@@ -2,6 +2,11 @@ import React, { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
 import { useAppSelector } from "@/store/hooks";
 import { Box, useTheme } from "@mui/material";
+import type {
+  ChartData,
+  ChartOptions,
+  ScriptableContext,
+} from "chart.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,9 +15,6 @@ import {
   Title,
   Tooltip,
   Legend,
-  ChartData,
-  ChartOptions,
-  ScriptableContext,
 } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -23,11 +25,11 @@ const OrdersByCustomerChart: React.FC = () => {
 
   const { amountsByCustomer, maxAmount } = useMemo(() => {
     const amounts = orders.reduce<Record<string, number>>((acc, order) => {
-    if (order.customer) {
-      acc[order.customer] = (acc[order.customer] || 0) + (order.amount || 0);
-    }
-    return acc;
-  }, {});
+      if (order.customer) {
+        acc[order.customer] = (acc[order.customer] || 0) + (order.amount || 0);
+      }
+      return acc;
+    }, {});
     
     const max = Math.max(...Object.values(amounts));
     return { amountsByCustomer: amounts, maxAmount: max };
@@ -43,7 +45,7 @@ const OrdersByCustomerChart: React.FC = () => {
     return gradient;
   };
 
-  const data: ChartData<"bar"> = {
+  const chartData: ChartData<'bar'> = {
     labels,
     datasets: [
       {
@@ -65,16 +67,16 @@ const OrdersByCustomerChart: React.FC = () => {
     ],
   };
 
-  const options: ChartOptions<"bar"> = {
+  const chartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     animation: {
       duration: 2000,
-      easing: "easeInOutQuart" as const,
+      easing: "easeInOutQuart",
     },
     plugins: {
       legend: {
-        position: "top" as const,
+        position: "top",
         labels: {
           color: "#fff",
           font: {
@@ -106,7 +108,7 @@ const OrdersByCustomerChart: React.FC = () => {
         cornerRadius: 8,
         displayColors: false,
         callbacks: {
-          label: function(context: { parsed: { y: number } }) {
+          label: function(context: any) {
             return `$ ${context.parsed.y.toLocaleString()}`;
           }
         }
@@ -153,7 +155,7 @@ const OrdersByCustomerChart: React.FC = () => {
     },
     interaction: {
       intersect: false,
-      mode: 'index' as const,
+      mode: 'index',
     },
     layout: {
       padding: {
@@ -166,13 +168,13 @@ const OrdersByCustomerChart: React.FC = () => {
 
   return (
     <Box
-  sx={{
+      sx={{
         height: 450,
         width: '100%',
         maxWidth: '100%',
         ml: 0,
         mr: 0,
-    my: 4,
+        my: 4,
         p: 3,
         bgcolor: "rgba(0, 0, 0, 0.7)",
         borderRadius: 3,
@@ -191,10 +193,10 @@ const OrdersByCustomerChart: React.FC = () => {
           background: "linear-gradient(135deg, rgba(82, 168, 236, 0.1) 0%, rgba(82, 168, 236, 0) 100%)",
           pointerEvents: "none",
         },
-  }}
->
-  <Bar data={data} options={options} />
-</Box>
+      }}
+    >
+      <Bar data={chartData} options={chartOptions} />
+    </Box>
   );
 };
 
