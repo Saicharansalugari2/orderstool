@@ -1,4 +1,3 @@
-
 # orderstool
 
 Built by Saicharan Salugari
@@ -23,7 +22,7 @@ I built this Orderstool it is a full-stack Next.js application for managing and 
 
 ## Export Functionality
 
-7.Export orders to CSV via a button 
+7.Export orders to CSV via button 
 
 ## Modern UI
 
