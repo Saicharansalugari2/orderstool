@@ -3,7 +3,7 @@
     "orderNumber": "ORD-0004",
     "customer": "Umbrella Corp",
     "transactionDate": "2025-05-04",
-    "status": "Approved",
+    "status": "Shipped",
     "fromLocation": "Warehouse D",
     "toLocation": "Hospital E",
     "pendingApprovalReasonCode": [
@@ -633,7 +633,7 @@
     "customer": "Acme Corporation",
     "orderCreatedDate": "2025-05-01T04:00:00.000Z",
     "dueDate": "2025-05-08T04:00:00.000Z",
-    "status": "Approved",
+    "status": "Shipped",
     "fromLocation": "Warehouse A",
     "toLocation": "Retail Store B",
     "pendingApprovalReasonCodes": [

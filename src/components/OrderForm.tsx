@@ -331,10 +331,8 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
       return;
     }
     if (name === 'pendingApprovalReasonCode') {
-      setFormData(prev => ({ 
-        ...prev, 
-        [name]: typeof value === 'string' ? [value] : value 
-      }));
+      const newValue = Array.isArray(value) ? value : [value];
+      setFormData(prev => ({ ...prev, [name]: newValue }));
       return;
     }
 
@@ -354,390 +352,558 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   }
 
   return (
-    <Paper className={styles.formContainer}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <IconButton 
-          onClick={() => router.push('/orders/list')}
-          sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h5" className={styles.formTitle}>
-          {mode === 'create' ? 'Create New Order' : `Order ${orderNumber}`}
-        </Typography>
-      </Box>
-
-      {error && (
-        <Alert severity="error" className={styles.alert}>
-          {error}
-        </Alert>
-      )}
-
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <Grid container spacing={3}>
-          {/* Basic Information */}
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ color: '#52a8ec', mb: 2 }}>Basic Information</Typography>
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Customer Name"
-              name="customer"
-              value={formData.customer}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              required
-              placeholder="Enter customer name"
-              InputLabelProps={{ 
-                shrink: true,
-                sx: { color: 'rgba(255, 255, 255, 0.7)' }
-              }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Transaction Date"
-              name="transactionDate"
-              type="date"
-              value={formData.transactionDate}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              required
-              InputLabelProps={{ 
-                shrink: true,
-                sx: { color: 'rgba(255, 255, 255, 0.7)' }
-              }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>From Location</InputLabel>
-              <Select
-                {...commonSelectProps}
-                name="fromLocation"
-                value={formData.fromLocation}
-                onChange={handleSelectChange}
-                disabled={mode === 'view'}
-                label="From Location"
-              >
-                {locationOptions.map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="To Location"
-              name="toLocation"
-              value={formData.toLocation}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              required
-              placeholder="Enter destination"
-              InputLabelProps={{ 
-                shrink: true,
-                sx: { color: 'rgba(255, 255, 255, 0.7)' }
-              }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select<OrderStatus>
-                {...commonSelectProps}
-                name="status"
-                value={formData.status}
-                onChange={handleStatusChange}
-                disabled={mode === 'view'}
-                label="Status"
-              >
-                {statusOptions.map(option => (
-                  <MenuItem 
-                    key={option.value} 
-                    value={option.value}
-                    sx={getStatusStyles(option.value)}
-                  >
-                    {option.value}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Pending Approval Reason</InputLabel>
-              <Select
-                {...commonSelectProps}
-                name="pendingApprovalReasonCode"
-                value={formData.pendingApprovalReasonCode}
-                onChange={handleSelectChange}
-                disabled={mode === 'view'}
-                label="Pending Approval Reason"
-                multiple
-              >
-                {pendingApprovalReasonCodes.map(code => (
-                  <MenuItem key={code} value={code}>
-                    {code}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Order Lines */}
-          {formData.lines.map((line) => (
-            <Box 
-              key={line.id}
-              sx={{
-                display: 'flex',
-                gap: 2,
-                mb: 2,
-                p: 2,
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '8px',
-                alignItems: 'center'
-              }}
-            >
-              <FormControl sx={{ flex: 2 }}>
-                <InputLabel>Item</InputLabel>
-                <Select
-                  {...commonSelectProps}
-                  value={line.item}
-                  onChange={(e) => handleOrderLineChange(line.id, 'item', e.target.value)}
-                  disabled={mode === 'view'}
-                  label="Item"
-                >
-                  {itemOptions.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl sx={{ flex: 1 }}>
-                <InputLabel>Units</InputLabel>
-                <Select
-                  {...commonSelectProps}
-                  value={line.units}
-                  onChange={(e) => handleOrderLineChange(line.id, 'units', e.target.value)}
-                  disabled={mode === 'view'}
-                  label="Units"
-                >
-                  {unitsOptions.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <TextField
-                {...commonInputProps}
-                label="Quantity"
-                type="number"
-                value={line.quantity}
-                onChange={(e) => handleOrderLineChange(line.id, 'quantity', Number(e.target.value))}
-                disabled={mode === 'view'}
-                sx={{ flex: 1, ...commonInputProps.sx }}
-              />
-
-              <TextField
-                {...commonInputProps}
-                label="Price"
-                type="number"
-                value={line.price}
-                onChange={(e) => handleOrderLineChange(line.id, 'price', Number(e.target.value))}
-                disabled={mode === 'view'}
-                sx={{ flex: 1, ...commonInputProps.sx }}
-              />
-
-              <Typography sx={{ flex: 1, color: '#52a8ec' }}>
-                ${line.amount.toFixed(2)}
-              </Typography>
-
-              {mode === 'create' && formData.lines.length > 1 && (
-                <IconButton 
-                  onClick={() => removeOrderLine(line.id)}
-                  sx={{ color: '#f44336' }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              )}
-            </Box>
-          ))}
-
-          {/* Dates Section */}
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ color: '#52a8ec', mb: 2, mt: 2 }}>Dates</Typography>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Early Pickup Date"
-              name="earlyPickupDate"
-              type="date"
-              value={formData.earlyPickupDate}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Late Pickup Date"
-              name="latePickupDate"
-              type="date"
-              value={formData.latePickupDate}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-
-          {/* Address Section */}
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ color: '#52a8ec', mb: 2, mt: 2 }}>Address Information</Typography>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Billing Address"
-              name="billingAddress"
-              multiline
-              rows={3}
-              value={formData.billingAddress}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Shipping Address"
-              name="shippingAddress"
-              multiline
-              rows={3}
-              value={formData.shippingAddress}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-
-          {/* Total Amount */}
-          <Grid item xs={12}>
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              mt: 2,
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              pt: 2
-            }}>
-              <Typography variant="h6" sx={{ 
+    <Box sx={{
+      p: 4,
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+      color: '#FFFFFF',
+    }}>
+      <Paper 
+        className={styles.formContainer}
+        sx={{
+          p: 4,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 2,
+          maxWidth: 1200,
+          mx: 'auto',
+          position: 'relative',
+          overflow: 'visible',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+          },
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2, 
+          mb: 4,
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          pb: 2
+        }}>
+          <IconButton 
+            onClick={() => router.push('/orders/list')}
+            sx={{ 
+              color: 'rgba(255, 255, 255, 0.7)',
+              '&:hover': {
                 color: '#52a8ec',
-                fontSize: '1.5rem',
-                fontWeight: 600
-              }}>
-                Total Amount: ${formData.lines.reduce((sum, line) => sum + line.amount, 0).toFixed(2)}
+                backgroundColor: 'rgba(82, 168, 236, 0.1)',
+              }
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography 
+            variant="h5" 
+            sx={{
+              fontWeight: 800,
+              color: '#FFFFFF',
+              textShadow: '0 0 20px rgba(255, 255, 255, 0.4)',
+            }}
+          >
+            {mode === 'create' ? 'Create New Order' : `Order ${orderNumber}`}
+          </Typography>
+        </Box>
+
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3,
+              backgroundColor: 'rgba(244, 67, 54, 0.1)',
+              color: '#f44336',
+              '& .MuiAlert-icon': {
+                color: '#f44336'
+              }
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <Grid container spacing={3}>
+            {/* Basic Information */}
+            <Grid item xs={12}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#52a8ec', 
+                  mb: 3,
+                  fontWeight: 700,
+                  textShadow: '0 0 10px rgba(82, 168, 236, 0.3)'
+                }}
+              >
+                Basic Information
               </Typography>
-            </Box>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField
+                  {...commonInputProps}
+                  label="Customer Name"
+                  name="customer"
+                  value={formData.customer}
+                  onChange={handleInputChange}
+                  disabled={mode === 'view'}
+                  required
+                  placeholder="Enter customer name"
+                  InputLabelProps={{ 
+                    shrink: true,
+                    sx: { color: 'rgba(255, 255, 255, 0.7)' }
+                  }}
+                  sx={{
+                    ...commonInputProps.sx,
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(82, 168, 236, 0.5)',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#52a8ec',
+                      }
+                    }
+                  }}
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                {...commonInputProps}
+                fullWidth
+                label="Transaction Date"
+                name="transactionDate"
+                type="date"
+                value={formData.transactionDate}
+                onChange={handleInputChange}
+                disabled={mode === 'view'}
+                required
+                InputLabelProps={{ 
+                  shrink: true,
+                  sx: { color: 'rgba(255, 255, 255, 0.7)' }
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>From Location</InputLabel>
+                <Select
+                  {...commonSelectProps}
+                  name="fromLocation"
+                  value={formData.fromLocation}
+                  onChange={handleSelectChange}
+                  disabled={mode === 'view'}
+                  label="From Location"
+                >
+                  {locationOptions.map(option => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                {...commonInputProps}
+                fullWidth
+                label="To Location"
+                name="toLocation"
+                value={formData.toLocation}
+                onChange={handleInputChange}
+                disabled={mode === 'view'}
+                required
+                placeholder="Enter destination"
+                InputLabelProps={{ 
+                  shrink: true,
+                  sx: { color: 'rgba(255, 255, 255, 0.7)' }
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select<OrderStatus>
+                  {...commonSelectProps}
+                  name="status"
+                  value={formData.status}
+                  onChange={handleStatusChange}
+                  disabled={mode === 'view'}
+                  label="Status"
+                >
+                  {statusOptions.map(option => (
+                    <MenuItem 
+                      key={option.value} 
+                      value={option.value}
+                      sx={getStatusStyles(option.value)}
+                    >
+                      {option.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Pending Approval Reason</InputLabel>
+                <Select
+                  {...commonSelectProps}
+                  name="pendingApprovalReasonCode"
+                  value={formData.pendingApprovalReasonCode || []}
+                  onChange={handleSelectChange}
+                  disabled={mode === 'view'}
+                  label="Pending Approval Reason"
+                  multiple
+                >
+                  {pendingApprovalReasonCodes.map(code => (
+                    <MenuItem key={code} value={code}>
+                      {code}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {/* Dates Section */}
+            <Grid item xs={12} sx={{ mt: 4 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#52a8ec', 
+                  mb: 3,
+                  fontWeight: 700,
+                  textShadow: '0 0 10px rgba(82, 168, 236, 0.3)'
+                }}
+              >
+                Dates
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                {...commonInputProps}
+                fullWidth
+                label="Early Pickup Date"
+                name="earlyPickupDate"
+                type="date"
+                value={formData.earlyPickupDate}
+                onChange={handleInputChange}
+                disabled={mode === 'view'}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                {...commonInputProps}
+                fullWidth
+                label="Late Pickup Date"
+                name="latePickupDate"
+                type="date"
+                value={formData.latePickupDate}
+                onChange={handleInputChange}
+                disabled={mode === 'view'}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            {/* Address Section */}
+            <Grid item xs={12} sx={{ mt: 4 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#52a8ec', 
+                  mb: 3,
+                  fontWeight: 700,
+                  textShadow: '0 0 10px rgba(82, 168, 236, 0.3)'
+                }}
+              >
+                Address Information
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                {...commonInputProps}
+                fullWidth
+                label="Billing Address"
+                name="billingAddress"
+                multiline
+                rows={3}
+                value={formData.billingAddress}
+                onChange={handleInputChange}
+                disabled={mode === 'view'}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                {...commonInputProps}
+                fullWidth
+                label="Shipping Address"
+                name="shippingAddress"
+                multiline
+                rows={3}
+                value={formData.shippingAddress}
+                onChange={handleInputChange}
+                disabled={mode === 'view'}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            {/* Order Lines Section - Moved to the end */}
+            <Grid item xs={12} sx={{ mt: 6 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#52a8ec', 
+                  mb: 3,
+                  fontWeight: 700,
+                  textShadow: '0 0 10px rgba(82, 168, 236, 0.3)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                  pt: 4
+                }}
+              >
+                Order Lines
+              </Typography>
+
+              <Box sx={{ mb: 4 }}>
+                {formData.lines.map((line) => (
+                  <Box 
+                    key={line.id}
+                    sx={{
+                      display: 'flex',
+                      gap: 2,
+                      mb: 2,
+                      p: 3,
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: 2,
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        borderColor: 'rgba(82, 168, 236, 0.3)',
+                      }
+                    }}
+                  >
+                    <FormControl sx={{ flex: 2 }}>
+                      <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Item</InputLabel>
+                      <Select
+                        {...commonSelectProps}
+                        value={line.item}
+                        onChange={(e) => handleOrderLineChange(line.id, 'item', e.target.value)}
+                        disabled={mode === 'view'}
+                        label="Item"
+                      >
+                        {itemOptions.map(option => (
+                          <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl sx={{ flex: 1 }}>
+                      <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Units</InputLabel>
+                      <Select
+                        {...commonSelectProps}
+                        value={line.units}
+                        onChange={(e) => handleOrderLineChange(line.id, 'units', e.target.value)}
+                        disabled={mode === 'view'}
+                        label="Units"
+                      >
+                        {unitsOptions.map(option => (
+                          <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <TextField
+                      {...commonInputProps}
+                      label="Quantity"
+                      type="number"
+                      value={line.quantity}
+                      onChange={(e) => handleOrderLineChange(line.id, 'quantity', Number(e.target.value))}
+                      disabled={mode === 'view'}
+                      sx={{ flex: 1 }}
+                    />
+
+                    <TextField
+                      {...commonInputProps}
+                      label="Price"
+                      type="number"
+                      value={line.price}
+                      onChange={(e) => handleOrderLineChange(line.id, 'price', Number(e.target.value))}
+                      disabled={mode === 'view'}
+                      sx={{ flex: 1 }}
+                    />
+
+                    <Typography sx={{ 
+                      flex: 1, 
+                      color: '#52a8ec',
+                      fontWeight: 600
+                    }}>
+                      ${line.amount.toFixed(2)}
+                    </Typography>
+
+                    {mode === 'create' && formData.lines.length > 1 && (
+                      <IconButton 
+                        onClick={() => removeOrderLine(line.id)}
+                        sx={{ 
+                          color: '#f44336',
+                          '&:hover': {
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)'
+                          }
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  </Box>
+                ))}
+
+                {mode === 'create' && (
+                  <Button
+                    startIcon={<AddCircleIcon />}
+                    onClick={addOrderLine}
+                    sx={{
+                      mt: 2,
+                      color: '#52a8ec',
+                      borderColor: '#52a8ec',
+                      '&:hover': {
+                        borderColor: '#3994d6',
+                        backgroundColor: 'rgba(82, 168, 236, 0.1)',
+                      },
+                      textTransform: 'none',
+                      fontWeight: 600,
+                    }}
+                    variant="outlined"
+                  >
+                    Add Order Line
+                  </Button>
+                )}
+              </Box>
+
+              {/* Total Amount */}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'flex-end', 
+                alignItems: 'center',
+                mt: 4,
+                pt: 3,
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#52a8ec',
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                  textShadow: '0 0 10px rgba(82, 168, 236, 0.3)'
+                }}>
+                  Total Amount: ${formData.lines.reduce((sum, line) => sum + line.amount, 0).toFixed(2)}
+                </Typography>
+              </Box>
+            </Grid>
           </Grid>
 
-          <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
-            <TextField
-              label="Total Ship Unit Count"
-              name="totalShipUnitCount"
-              type="number"
-              inputProps={{ min: 0, step: 1 }}
-              value={formData.totalShipUnitCount}
-              onChange={handleInputChange}
-              sx={{ ...commonInputProps.sx, flex: 1 }}
-            />
-            <TextField
-              label="Total Quantity"
-              name="totalQuantity"
-              type="number"
-              inputProps={{ min: 0, step: 1 }}
-              value={formData.totalQuantity}
-              onChange={handleInputChange}
-              sx={{ ...commonInputProps.sx, flex: 1 }}
-            />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
-            <TextField
-              label="Discount Rate (%)"
-              name="discountRate"
-              type="number"
-              inputProps={{ min: 0, max: 100, step: 0.01 }}
-              value={formData.discountRate}
-              onChange={handleInputChange}
-              sx={{ ...commonInputProps.sx, flex: 1 }}
-            />
-          </Box>
-        </Grid>
-
-        <Box className={styles.actionButtons}>
-          {mode === 'create' ? (
-            <>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center',
+            mt: 6,
+            pt: 4,
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            {mode === 'create' ? (
+              <>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  sx={{
+                    minWidth: 200,
+                    bgcolor: '#52a8ec',
+                    color: '#fff',
+                    '&:hover': {
+                      bgcolor: '#3994d6',
+                    },
+                    '&:disabled': {
+                      bgcolor: 'rgba(82, 168, 236, 0.5)',
+                    },
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    py: 1,
+                  }}
+                >
+                  {loading ? <CircularProgress size={24} /> : 'Create Order'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleCancel}
+                  disabled={loading}
+                  sx={{
+                    minWidth: 200,
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: '#fff',
+                    '&:hover': {
+                      borderColor: '#fff',
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    py: 1,
+                  }}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
               <Button
-                type="submit"
                 variant="contained"
-                color="primary"
-                disabled={loading}
-                className={styles.submitButton}
+                onClick={() => router.push('/orders/list')}
+                sx={{ 
+                  minWidth: 200,
+                  bgcolor: '#52a8ec',
+                  color: '#fff',
+                  '&:hover': {
+                    bgcolor: '#3994d6',
+                  },
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  py: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
               >
-                {loading ? <CircularProgress size={24} /> : 'Create Order'}
+                <ArrowBackIcon sx={{ fontSize: '1.2rem' }} /> Back to Orders
               </Button>
-              <Button
-                variant="outlined"
-                onClick={handleCancel}
-                disabled={loading}
-                className={styles.cancelButton}
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="contained"
-              onClick={() => router.push('/orders/list')}
-              sx={{ 
-                minWidth: '300px',
-                fontSize: '1rem',
-                padding: '8px 16px',
-                margin: '0 auto',
-                display: 'block',
-                marginTop: '32px',
-                '& .MuiSvgIcon-root': {
-                  fontSize: '1rem'
-                }
-              }}
-            >
-              <ArrowBackIcon style={{ marginRight: '8px' }} /> Back to Orders
-            </Button>
-          )}
-        </Box>
-      </form>
-    </Paper>
+            )}
+          </Box>
+        </form>
+      </Paper>
+    </Box>
   );
 } 
