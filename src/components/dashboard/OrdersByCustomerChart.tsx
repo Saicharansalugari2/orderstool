@@ -31,8 +31,10 @@ const OrdersByCustomerChart: React.FC = () => {
       return acc;
     }, {});
     
-    const max = Math.max(...Object.values(amounts));
-    return { amountsByCustomer: amounts, maxAmount: max };
+
+ const values = Object.values(amounts) as number[];      // <-- cast once
+   const max = values.length ? Math.max(...values) : 0;    // safe for empty
+  return { amountsByCustomer: amounts, maxAmount: max };
   }, [orders]);
 
   const labels = Object.keys(amountsByCustomer);
