@@ -119,7 +119,7 @@ export default function ViewOrderPage() {
       </Box>
 
       <Box className={styles.form} sx={{ gap: 1.5 }}>
-        {/* Basic Information */}
+ 
         <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#52a8ec', fontSize: '1.1rem' }}>
             Basic Information
@@ -166,7 +166,7 @@ export default function ViewOrderPage() {
           </Grid>
         </Paper>
 
-        {/* Order Totals */}
+
         <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#52a8ec', fontSize: '1.1rem' }}>
             Order Totals
@@ -215,7 +215,7 @@ export default function ViewOrderPage() {
           </Grid>
         </Paper>
 
-        {/* Shipping Details */}
+     
         <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#52a8ec', fontSize: '1.1rem' }}>
             Shipping Details
@@ -264,7 +264,7 @@ export default function ViewOrderPage() {
           </Grid>
         </Paper>
 
-        {/* Additional Information */}
+
         <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#52a8ec', fontSize: '1.1rem' }}>
             Additional Information
@@ -339,7 +339,6 @@ export default function ViewOrderPage() {
           </Grid>
         </Paper>
 
-        {/* Order Lines */}
         <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#52a8ec', fontSize: '1.1rem' }}>
             Order Lines
@@ -458,7 +457,6 @@ export default function ViewOrderPage() {
           </Grid>
         </Paper>
 
-        {/* Order History */}
         <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#52a8ec', fontSize: '1.1rem' }}>
             Order History
@@ -495,7 +493,6 @@ export default function ViewOrderPage() {
           </Box>
         </Paper>
 
-        {/* Back Button - Centered at bottom */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
           <Button 
             variant="contained"

@@ -1,4 +1,4 @@
-// src/components/OrderForm.tsx
+
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -26,8 +26,6 @@ import {
   updateOrderAsync,
 } from '@/store/ordersThunks';
 
-/* -------------------------------------------------------------------------- */
-/*  ──  helpers / constants  ──────────────────────────────────────────────── */
 
 interface OrderFormProps {
   mode: 'create' | 'view';
@@ -44,7 +42,7 @@ const blankLine = (): OrderLine => ({
 });
 
 const initialOrderState: Omit<Order, 'orderNumber'> = {
-  /* required fields ------------------------------------------------------- */
+
   id: crypto.randomUUID(),
   customer: '',
   transactionDate: new Date().toISOString().split('T')[0],
@@ -52,7 +50,7 @@ const initialOrderState: Omit<Order, 'orderNumber'> = {
   fromLocation: '',
   toLocation: '',
 
-  /* optional / numeric ---------------------------------------------------- */
+
   latePickupDate: '',
   earlyPickupDate: '',
   totalShipUnitCount: 0,
@@ -60,11 +58,10 @@ const initialOrderState: Omit<Order, 'orderNumber'> = {
   discountRate: 0,
   amount: 0,
 
-  /* dropdowns / mutually exclusive --------------------------------------- */
+
   incoterm: '',
   freightTerms: '',
 
-  /* strings ---------------------------------------------------------------- */
   supportRep: '',
   billingAddress: {
     street: '',
@@ -81,18 +78,16 @@ const initialOrderState: Omit<Order, 'orderNumber'> = {
     country: ''
   },
 
-  /* arrays ---------------------------------------------------------------- */
+
   pendingApprovalReasonCode: [],
   lines: [blankLine()],
 
-  /* audit trail ----------------------------------------------------------- */
   history: [],
 };
 
 const statusOptions = ['Pending', 'Approved', 'Shipped', 'Cancelled'] as const;
 
-/* -------------------------------------------------------------------------- */
-/*  ──  component  ─────────────────────────────────────────────────────────── */
+
 
 export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   const router = useRouter();
@@ -103,9 +98,6 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(mode === 'create');
 
-  /* ─────────────────────────────────────────────────────────────────────── */
-  /*  load order when in view-mode                                           */
-  /* ─────────────────────────────────────────────────────────────────────── */
 
   useEffect(() => {
     (async () => {
@@ -113,8 +105,7 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
         setLoading(true);
         try {
           const order = await dispatch(fetchOrderByIdAsync(orderNumber)).unwrap();
-          // remove orderNumber so it matches the Omit<> shape
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
           const { orderNumber: _omit, ...rest } = order;
           setFormData(rest);
         } catch (e) {
@@ -126,14 +117,11 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
     })();
   }, [mode, orderNumber, dispatch]);
 
-  /* ─────────────────────────────────────────────────────────────────────── */
-  /*  handlers                                                               */
-  /* ─────────────────────────────────────────────────────────────────────── */
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Handle nested address fields
+   
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       if (parent === 'billingAddress' || parent === 'shippingAddress') {
@@ -162,9 +150,9 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
 
     try {
       if (mode === 'create') {
-        // ――― add an orderNumber so the payload is a complete `Order`
+       
 const newOrder: Order = {
-  orderNumber: crypto.randomUUID(),   // or nanoid()
+  orderNumber: crypto.randomUUID(),   
   ...formData,
 };
 
@@ -191,9 +179,6 @@ const created = await dispatch(createOrderAsync(newOrder)).unwrap();
     }
   };
 
-  /* ─────────────────────────────────────────────────────────────────────── */
-  /*  rendering                                                              */
-  /* ─────────────────────────────────────────────────────────────────────── */
 
   if (loading && mode === 'view' && !isEditing) {
     return (
@@ -217,7 +202,7 @@ const created = await dispatch(createOrderAsync(newOrder)).unwrap();
 
       <form onSubmit={onSubmit} className={styles.form}>
         <Grid container spacing={3}>
-          {/* customer, dates, amount --------------------------------------- */}
+
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
@@ -270,7 +255,6 @@ const created = await dispatch(createOrderAsync(newOrder)).unwrap();
             />
           </Grid>
 
-          {/* status --------------------------------------------------------- */}
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
@@ -289,7 +273,7 @@ const created = await dispatch(createOrderAsync(newOrder)).unwrap();
             </FormControl>
           </Grid>
 
-          {/* Billing Address */}
+         
           <Grid item xs={12} sm={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Typography variant="subtitle1">Billing Address</Typography>
@@ -336,7 +320,7 @@ const created = await dispatch(createOrderAsync(newOrder)).unwrap();
             </Box>
           </Grid>
 
-          {/* Shipping Address */}
+         
           <Grid item xs={12} sm={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Typography variant="subtitle1">Shipping Address</Typography>

@@ -1,4 +1,4 @@
-// pages/api/orders/orders.ts
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
 import fs from 'fs/promises';
@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     switch (method) {
       case 'GET':
-        // If orderNumber is provided, return specific order
+   
         if (orderNumber) {
           const order = orders.find(o => normalizeOrderNumber(o.orderNumber) === orderNumber);
           if (!order) {
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(200).json(order);
         }
 
-        // Otherwise return all orders
+      
         const orderMap = new Map<string, Order>();
         orders.forEach(order => {
           const normalizedOrder = {

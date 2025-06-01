@@ -37,7 +37,7 @@ const OrderSuccess = () => {
         </div>
       </div>
       
-      {/* Decorative Elements */}
+    
       <Box
         sx={{
           position: 'absolute',
@@ -80,7 +80,7 @@ const OrderSuccess = () => {
         }}
       />
       
-      {/* Success Message Overlay */}
+     
       <Box
         sx={{
           position: 'absolute',

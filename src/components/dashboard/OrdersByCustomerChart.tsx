@@ -1,4 +1,4 @@
-/* src/components/dashboard/OrdersByCustomerChart.tsx */
+
 
 import React, { useMemo } from 'react';
 import {
@@ -169,7 +169,7 @@ const OrdersByCustomerChart: React.FC = () => {
         },
       }}
     >
-      {/* @ts-ignore */}
+   
       <Bar data={chartData} options={chartOptions} />
     </Box>
   );

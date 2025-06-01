@@ -1,6 +1,3 @@
-/* -------------------------------------------------------------------------- */
-/*  src/pages/reports/index.tsx                                               */
-/* -------------------------------------------------------------------------- */
 
 import React, { useMemo } from 'react';
 import { Box, Typography, Paper, Grid, Divider } from '@mui/material';
@@ -23,8 +20,6 @@ import PendingIcon from '@mui/icons-material/Pending';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-/* ----------------------------- helper colours ---------------------------- */
-
 const statusColor: Record<string, string> = {
   Pending:   '#FF9800',
   Approved:  '#4CAF50',
@@ -41,12 +36,11 @@ const statusIcon: Record<string, React.ReactNode> = {
   Cancelled: <CancelIcon sx={{ fontSize: 32, color: statusColor.Cancelled }} />,
 };
 
-/* ------------------------------------------------------------------------ */
 
 const ReportsPage: React.FC = () => {
   const orders = useSelector((s: RootState) => s.orders.orders);
 
-  /* ---------------- aggregate once, memo-ised --------------------------- */
+
   const { metrics, totalAmount } = useMemo(() => {
     const m: Record<
       string,
@@ -68,7 +62,7 @@ const ReportsPage: React.FC = () => {
     return { metrics: m, totalAmount: runningTotal };
   }, [orders]);
 
-  /* ---------------- chart-friendly structures -------------------------- */
+  
 
   const labels = Object.keys(metrics);
   const counts = labels.map((l) => metrics[l].count);
@@ -116,7 +110,6 @@ const ReportsPage: React.FC = () => {
     },
   } as const;
 
-  /* ----------------------------- render -------------------------------- */
 
   return (
     <Box
@@ -144,15 +137,14 @@ const ReportsPage: React.FC = () => {
           borderRadius: 2,
         }}
       >
-        {/* ---------- PIE CHART ---------- */}
+ 
         <Box sx={{ position: 'relative', height: 400, mb: 4 }}>
-          {/* @ts-expect-error - Known issue with react-chartjs-2 types */}
           <Pie data={chartData} options={chartOptions} />
         </Box>
 
         <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.2)' }} />
 
-        {/* ---------- SUMMARY CARDS ---------- */}
+       
           <Grid container spacing={3}>
             <Grid item xs={12}>
             <Paper

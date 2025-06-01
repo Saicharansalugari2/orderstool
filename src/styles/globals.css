@@ -79,7 +79,7 @@ body {
   font-family: 'Space Grotesk', sans-serif;
 }
 
-/* Scrollbar Styling */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -99,7 +99,7 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Glass Effect */
+
 .glass {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px);
@@ -108,7 +108,6 @@ body {
   border-radius: 16px;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -124,7 +123,6 @@ body {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Utility Classes */
 .text-gradient {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   -webkit-background-clip: text;
@@ -153,7 +151,7 @@ body {
   gap: 1.5rem;
 }
 
-/* Responsive Design Helpers */
+
 @media (max-width: 640px) {
   .hide-sm {
     display: none;
@@ -172,7 +170,7 @@ body {
   }
 }
 
-/* Form Elements */
+
 input,
 textarea,
 select {
@@ -203,7 +201,6 @@ button:disabled {
   opacity: 0.7;
 }
 
-/* Loading States */
 .loading-skeleton {
   background: linear-gradient(
     90deg,
@@ -224,7 +221,7 @@ button:disabled {
   }
 }
 
-/* Animation keyframes */
+
 @keyframes slideIn {
   from {
     transform: translateX(-20px);
@@ -236,12 +233,12 @@ button:disabled {
   }
 }
 
-/* Animation classes */
+
 .animate-slide-in {
   animation: slideIn 0.5s ease-out forwards;
 }
 
-/* Custom utilities */
+
 .bg-gradient {
   background: linear-gradient(135deg, var(--background-dark) 0%, #1a1a1a 100%);
 }
@@ -250,7 +247,6 @@ button:disabled {
   border-image: linear-gradient(to right, var(--primary), var(--secondary)) 1;
 }
 
-/* MUI overrides */
 .MuiPaper-root {
   background-color: rgba(0, 0, 0, 0.8) !important;
   -webkit-backdrop-filter: blur(10px) !important;
@@ -266,7 +262,7 @@ button:disabled {
   font-family: 'Space Grotesk', sans-serif !important;
 }
 
-/* Dark mode specific styles */
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background-dark: #000000;

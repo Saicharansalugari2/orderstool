@@ -1,4 +1,4 @@
-// src/store/ordersThunks.ts
+
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setOrders } from './ordersSlice';
 import type { RawOrder } from '@/types/rawOrder';
@@ -70,9 +70,7 @@ const transformToOrder = (raw: RawOrder): Order => {
   };
 };
 
-/* ------------------------------------------------------------------ */
-/*  ───────────── EXISTING THUNKS (unchanged) ──────────────────────── */
-/* ------------------------------------------------------------------ */
+
 
 export const fetchOrdersAsync = createAsyncThunk(
   'orders/fetchOrdersAsync',
@@ -97,7 +95,7 @@ export const deleteOrderAsync = createAsyncThunk<string, string>(
       throw new Error(err.message ?? 'Failed to delete order');
     }
 
-    // refresh list
+ 
     const res = await fetch('/api/orders');
     if (!res.ok) throw new Error('Failed to reload orders after deletion');
 
@@ -119,7 +117,6 @@ export const updateOrderStatusAsync = createAsyncThunk(
     });
     if (!put.ok) throw new Error('Failed to update order status');
 
-    // refresh list
     const res = await fetch('/api/orders');
     if (!res.ok) throw new Error('Failed to reload orders after status update');
 
@@ -131,14 +128,7 @@ export const updateOrderStatusAsync = createAsyncThunk(
   }
 );
 
-/* ------------------------------------------------------------------ */
-/*  ───────────── NEW THUNKS REQUIRED BY OrderForm.tsx ─────────────── */
-/* ------------------------------------------------------------------ */
 
-/**
- * createOrderAsync
- * POSTs a new order, then refreshes the list so all pages stay in sync.
- */
 export const createOrderAsync = createAsyncThunk<
   Order,          // return type
   Order,          // argument type
@@ -153,7 +143,7 @@ export const createOrderAsync = createAsyncThunk<
     if (!res.ok) throw new Error('Network response was not ok');
     const saved = transformToOrder(await res.json());
 
-    // refresh list
+   
     await dispatch(fetchOrdersAsync());
 
     return saved;
@@ -162,10 +152,7 @@ export const createOrderAsync = createAsyncThunk<
   }
 });
 
-/**
- * fetchOrderByIdAsync
- * Retrieves a single order for the View / Edit page.
- */
+
 export const fetchOrderByIdAsync = createAsyncThunk<Order, string>(
   'orders/fetchOrderByIdAsync',
   async (orderNumber) => {
@@ -177,10 +164,7 @@ export const fetchOrderByIdAsync = createAsyncThunk<Order, string>(
   }
 );
 
-/**
- * updateOrderAsync
- * PUTs the full order payload, then refreshes the list.
- */
+
 export const updateOrderAsync = createAsyncThunk<
   Order,
   Order,
@@ -196,7 +180,7 @@ export const updateOrderAsync = createAsyncThunk<
 
     const updated = transformToOrder(await res.json());
 
-    // refresh list
+   
     await dispatch(fetchOrdersAsync());
 
     return updated;

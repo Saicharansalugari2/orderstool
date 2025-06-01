@@ -1,4 +1,4 @@
-// store/ordersSlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Order } from '@/types/order';
 import { deleteOrderAsync } from './ordersThunks';
@@ -22,10 +22,10 @@ const loadFromLocalStorage = (): Order[] => {
   try {
     const stored = localStorage.getItem('orders');
     const orders = stored ? JSON.parse(stored) : [];
-    // Ensure all orders have a valid status
+    // I Ensured all orders have a valid status
     return orders.map((order: Order) => ({
       ...order,
-      status: order.status || 'Pending' // Default to 'Pending' if status is empty
+      status: order.status || 'Pending' 
     }));
   } catch {
     return [];
@@ -44,7 +44,7 @@ export const ordersSlice = createSlice({
   initialState,
   reducers: {
     setOrders(state, action: PayloadAction<Order[]>) {
-      // Normalize orderNumber when loading or setting orders and remove duplicates
+      // Normalized orderNumber when loading or setting orders and remove duplicates
       const orderMap = new Map<string, Order>();
       
       action.payload.forEach(order => {
@@ -53,7 +53,7 @@ export const ordersSlice = createSlice({
           orderNumber: String(order.orderNumber).trim(),
         };
         
-        // Keep only the latest order with the same order number
+        // Kept only the latest order with the same order number
         const existingOrder = orderMap.get(normalizedOrder.orderNumber);
         if (!existingOrder || new Date(normalizedOrder.transactionDate) > new Date(existingOrder.transactionDate)) {
           orderMap.set(normalizedOrder.orderNumber, normalizedOrder);
@@ -99,25 +99,25 @@ export const ordersSlice = createSlice({
       const { orderNumber, status } = action.payload;
       console.log('Updating order status:', { orderNumber, status });
       
-      // Find all instances of the order number
+      // Found all instances of the order number
       const orderIndices = state.orders
         .map((order, index) => ({ order, index }))
         .filter(({ order }) => String(order.orderNumber).trim() === String(orderNumber).trim());
 
       if (orderIndices.length > 0) {
-        // If multiple instances exist, keep only the latest one
+        // If multiple instances exist, kept only the latest one
         const latestOrder = orderIndices.reduce((latest, current) => {
           const currentDate = new Date(current.order.transactionDate);
           const latestDate = new Date(latest.order.transactionDate);
           return currentDate > latestDate ? current : latest;
         });
 
-        // Remove all other instances of this order number
+        // Removed all other instances of this order number
         state.orders = state.orders.filter((_, index) => 
           !orderIndices.map(o => o.index).includes(index) || index === latestOrder.index
         );
 
-        // Update the status of the latest order
+        // Updated the status of the latest order
         state.orders[latestOrder.index] = {
           ...state.orders[latestOrder.index],
           status: status || 'Pending'

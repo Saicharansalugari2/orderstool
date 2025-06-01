@@ -198,7 +198,7 @@ const commonStyles = {
   },
 };
 
-// Update MenuItem styles for all Select components
+
 const menuItemStyle = {
   display: 'flex',
   alignItems: 'center',
@@ -283,10 +283,9 @@ export default function CreateOrderPage() {
       prev.map(line => {
         if (Number(line.id) === id) {
           const updatedLine = { ...line, [field]: value };
-          // Convert string values to numbers for calculation
+        
           const quantity = Number(field === 'quantity' ? value : line.quantity);
           const price = Number(field === 'price' ? value : line.price);
-          // Calculate amount only if both quantity and price are valid numbers
           updatedLine.amount = !isNaN(quantity) && !isNaN(price) ? quantity * price : 0;
           return updatedLine;
         }
@@ -315,7 +314,7 @@ export default function CreateOrderPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields
+
     const requiredFields = {
       orderNumber: 'Order Number',
       customer: 'Customer',
@@ -332,7 +331,6 @@ export default function CreateOrderPage() {
       }
     }
 
-    // Validate either Incoterm or Freight Terms is selected
     if (!basicInfo.incoterm && !basicInfo.freightTerms) {
       alert('Either Incoterm or Freight Terms must be selected');
       return;
@@ -343,7 +341,6 @@ export default function CreateOrderPage() {
       return;
     }
 
-    // Calculate total amount from order lines
     const totalOrderAmount = orderLines.reduce((sum, line) => sum + line.amount, 0);
 
     const orderPayload = {
@@ -442,7 +439,6 @@ export default function CreateOrderPage() {
             Create New Order
           </Typography>
 
-          {/* Basic Information Card */}
           <Card sx={{ 
             ...commonStyles.card, 
             mb: { xs: 2, sm: 3 }, 
@@ -469,7 +465,7 @@ export default function CreateOrderPage() {
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
-              {/* Order Number + Customer Row */}
+            
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', sm: 'row' }, 
@@ -493,7 +489,6 @@ export default function CreateOrderPage() {
                 />
               </Box>
 
-              {/* Date + Status Row */}
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', sm: 'row' }, 
@@ -538,7 +533,7 @@ export default function CreateOrderPage() {
                 </FormControl>
               </Box>
 
-              {/* From + To Location Row */}
+              
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', sm: 'row' }, 
@@ -567,7 +562,7 @@ export default function CreateOrderPage() {
                 />
               </Box>
 
-              {/* Support Rep + Pending Approval Row */}
+             
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', sm: 'row' }, 
@@ -636,7 +631,6 @@ export default function CreateOrderPage() {
                 </FormControl>
               </Box>
 
-              {/* Discount Rate Row */}
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <TextField
                   label="Discount Rate (%)"
@@ -776,7 +770,6 @@ export default function CreateOrderPage() {
             </Box>
           </Card>
  
-          {/* Order Lines Card */}
           <Card sx={{ 
             ...commonStyles.card, 
             mb: 3, 
@@ -917,7 +910,7 @@ export default function CreateOrderPage() {
 </Box>
           </Card>
 
-          {/* Submit Button */}
+          
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
 <Button
               type="submit"

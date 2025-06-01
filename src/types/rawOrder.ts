@@ -1,4 +1,4 @@
-// src/types/rawOrder.ts
+
 export interface RawOrder {
     id?: string;
     orderNumber: string | number;

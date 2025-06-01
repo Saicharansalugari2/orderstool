@@ -125,9 +125,8 @@ export default function OrderListPage() {
         if (!response.ok) throw new Error('Failed to fetch orders');
         const ordersData = await response.json();
         
-        // Process orders to calculate totals and ensure dates
         const processedOrders = ordersData.map(order => {
-          // Calculate total amount from order lines
+          
           const totalAmount = order.lines?.reduce((sum, line) => sum + (line.amount || 0), 0) || 0;
           
           return {
@@ -524,7 +523,7 @@ export default function OrderListPage() {
 
   return (
     <Box className={styles.container}>
-      {/* Summary Cards Section */}
+
       <Grid
         container
         spacing={2}
@@ -623,7 +622,6 @@ export default function OrderListPage() {
         ))}
       </Grid>
 
-      {/* Header Section */}
       <Box className={styles.header} sx={{ 
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
@@ -687,7 +685,7 @@ export default function OrderListPage() {
         </Button>
       </Box>
 
-      {/* Status Tabs */}
+     
       <Box className={styles.statusTabs}>
         <Tabs 
           value={statusFilter} 
@@ -761,7 +759,7 @@ export default function OrderListPage() {
         </Tabs>
       </Box>
 
-      {/* Orders Table/Cards Section */}
+      
       {isMobile ? (
         <Box sx={{ px: 2 }}>
           {paginatedOrders.map((order) => renderMobileCard(order))}
@@ -998,7 +996,7 @@ export default function OrderListPage() {
         </TableContainer>
       )}
 
-      {/* Pagination */}
+    
       <TablePagination
         component="div"
         count={filteredOrders.length}
@@ -1073,7 +1071,7 @@ export default function OrderListPage() {
         }}
       />
 
-      {/* Actions Menu */}
+    
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}

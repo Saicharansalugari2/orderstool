@@ -1,4 +1,3 @@
-// src/types/order.ts
 
 export interface Address {
   street: string;
