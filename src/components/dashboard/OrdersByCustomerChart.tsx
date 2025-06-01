@@ -24,17 +24,16 @@ const OrdersByCustomerChart: React.FC = () => {
   const orders = useAppSelector((state) => state.orders.orders);
 
   const { amountsByCustomer, maxAmount } = useMemo(() => {
-    const amounts = orders.reduce<Record<string, number>>((acc, order) => {
+    const amounts = orders.reduce((acc, order) => {
       if (order.customer) {
-        acc[order.customer] = (acc[order.customer] || 0) + (order.amount || 0);
+        acc[order.customer] = (acc[order.customer] ?? 0) + (order.amount ?? 0);
       }
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
     
-
- const values = Object.values(amounts) as number[];      // <-- cast once
-   const max = values.length ? Math.max(...values) : 0;    // safe for empty
-  return { amountsByCustomer: amounts, maxAmount: max };
+    const values = Object.values(amounts) as number[]; 
+    const max    = values.length ? Math.max(...values) : 0; 
+    return { amountsByCustomer: amounts, maxAmount: max };
   }, [orders]);
 
   const labels = Object.keys(amountsByCustomer);
