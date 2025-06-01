@@ -1,0 +1,122 @@
+.formContainer {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 1200px;
+  width: 90%;
+}
+
+.formTitle {
+  color: #52a8ec !important;
+  margin-bottom: 2rem !important;
+  font-weight: 600 !important;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.alert {
+  margin-bottom: 2rem;
+}
+
+/* Style Material-UI inputs */
+.form :global(.MuiInputBase-root) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #fff;
+}
+
+.form :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.form :global(.MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form :global(.MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: #52a8ec;
+}
+
+.form :global(.MuiInputLabel-root) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.form :global(.MuiInputLabel-root.Mui-focused) {
+  color: #52a8ec;
+}
+
+.form :global(.MuiSelect-icon) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.form :global(.MuiMenuItem-root) {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.submitButton {
+  background: #52a8ec !important;
+  color: #fff !important;
+  min-width: 150px !important;
+}
+
+.submitButton:hover {
+  background: #3c8fd6 !important;
+}
+
+.cancelButton {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.cancelButton:hover {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.editButton {
+  background: #52a8ec !important;
+  color: #fff !important;
+  min-width: 150px !important;
+}
+
+.editButton:hover {
+  background: #3c8fd6 !important;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+@media (max-width: 600px) {
+  .formContainer {
+    padding: 1.5rem;
+    margin: 1rem;
+    width: auto;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .actionButtons button {
+    width: 100%;
+  }
+} 

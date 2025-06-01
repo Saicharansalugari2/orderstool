@@ -1,26 +1,275 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-background text-text-primary min-h-screen;
   }
 }
 
+@layer components {
+  .glass-effect {
+    @apply bg-background-paper backdrop-blur-sm border border-white/10 rounded-lg;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all duration-300 font-medium;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-all duration-300 font-medium;
+  }
+  
+  .status-chip {
+    @apply px-3 py-1 rounded-full flex items-center gap-2 text-sm font-medium;
+  }
+  
+  .status-chip.pending {
+    @apply bg-status-pending/10 text-status-pending;
+  }
+  
+  .status-chip.approved {
+    @apply bg-status-approved/10 text-status-approved;
+  }
+  
+  .status-chip.shipped {
+    @apply bg-status-shipped/10 text-status-shipped;
+  }
+  
+  .status-chip.cancelled {
+    @apply bg-status-cancelled/10 text-status-cancelled;
+  }
+}
+
+:root {
+  --primary: #4CC9F0;
+  --primary-light: #7CD7F4;
+  --primary-dark: #3BA8D0;
+  --secondary: #4ADE80;
+  --secondary-light: #7DE8A3;
+  --secondary-dark: #38B865;
+  --background: #000000;
+  --paper: rgba(0, 0, 0, 0.8);
+  --text-primary: #E2E8F0;
+  --text-secondary: #94A3B8;
+  --error: #FF6B6B;
+  --warning: #FFB86C;
+  --info: #52a8ec;
+  --success: #4ADE80;
+  --background-dark: #000000;
+  --background-light: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
 body {
+  max-width: 100vw;
+  overflow-x: hidden;
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Utility Classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Responsive Design Helpers */
+@media (max-width: 640px) {
+  .hide-sm {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hide-md {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hide-lg {
+    display: none;
+  }
+}
+
+/* Form Elements */
+input,
+textarea,
+select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.2);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Loading States */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Animation classes */
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+/* Custom utilities */
+.bg-gradient {
+  background: linear-gradient(135deg, var(--background-dark) 0%, #1a1a1a 100%);
+}
+
+.border-gradient {
+  border-image: linear-gradient(to right, var(--primary), var(--secondary)) 1;
+}
+
+/* MUI overrides */
+.MuiPaper-root {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.MuiButton-root {
+  text-transform: none !important;
+}
+
+.MuiTypography-root {
+  font-family: 'Space Grotesk', sans-serif !important;
+}
+
+/* Dark mode specific styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-dark: #000000;
+    --text-primary: #ffffff;
+  }
 }

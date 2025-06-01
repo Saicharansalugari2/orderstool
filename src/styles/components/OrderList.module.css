@@ -1,0 +1,239 @@
+.orderListContainer {
+  padding: 1.5rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.header h4 {
+  color: #52a8ec;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.searchContainer {
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchContainer :global(.MuiInputBase-root) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #fff;
+}
+
+.searchContainer :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.searchContainer :global(.MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.searchContainer :global(.MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: #52a8ec;
+}
+
+.searchContainer :global(.MuiInputAdornment-root .MuiSvgIcon-root) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.exportButton {
+  background: transparent !important;
+  border: 1px solid #52a8ec !important;
+  color: #52a8ec !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.exportButton:hover {
+  background: rgba(82, 168, 236, 0.1) !important;
+}
+
+.statusTabs {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statusTabs :global(.MuiTabs-root) {
+  min-height: 48px;
+}
+
+.statusTabs :global(.MuiTab-root) {
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: none;
+  min-height: 48px;
+}
+
+.statusTabs :global(.MuiTab-root.Mui-selected) {
+  color: #52a8ec;
+}
+
+.statusTabs :global(.MuiTabs-indicator) {
+  background-color: #52a8ec;
+}
+
+.tableContainer {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.table {
+  width: 100%;
+}
+
+.tableHeader {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.tableHeaderCell {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.tableHeaderCell :global(.MuiTableSortLabel-root) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.tableHeaderCell :global(.MuiTableSortLabel-root.Mui-active) {
+  color: #52a8ec !important;
+}
+
+.tableHeaderCell :global(.MuiTableSortLabel-root.Mui-active .MuiTableSortLabel-icon) {
+  color: #52a8ec !important;
+}
+
+.tableCell {
+  color: #fff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.tableRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.pending {
+  background: rgba(255, 152, 0, 0.1);
+  color: #FF9800;
+}
+
+.approved {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.shipped {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.cancelled {
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+}
+
+.actionButton {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.actionButton:hover {
+  color: #52a8ec !important;
+}
+
+.menuPaper {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menuPaper :global(.MuiMenuItem-root) {
+  color: #fff;
+}
+
+.menuPaper :global(.MuiMenuItem-root:hover) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dialogPaper {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  min-width: 300px;
+}
+
+.dialogPaper :global(.MuiDialogTitle-root) {
+  color: #52a8ec;
+}
+
+.dialogPaper :global(.MuiDialogContent-root) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dialogPaper :global(.MuiButton-root) {
+  color: #fff;
+}
+
+.tablePagination {
+  /* Add wrapper class for global styles */
+}
+
+.tablePagination :global(.MuiTablePagination-root) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.tablePagination :global(.MuiTablePagination-select) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.tablePagination :global(.MuiTablePagination-selectIcon) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchContainer {
+    max-width: 100%;
+  }
+
+  .exportButton {
+    width: 100%;
+  }
+
+  .statusTabs {
+    margin: 1rem -1.5rem;
+    padding: 0 1.5rem;
+  }
+} 

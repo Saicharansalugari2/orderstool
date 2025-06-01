@@ -1,0 +1,180 @@
+.createOrderContainer {
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+}
+
+.formContainer {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  color: #52a8ec;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.formSubtitle {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.formSection {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  color: #52a8ec;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+}
+
+.formInput {
+  width: 100%;
+}
+
+.formInput :global(.MuiInputBase-root) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #fff;
+}
+
+.formInput :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.formInput:hover :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.formInput.Mui-focused :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: #52a8ec;
+}
+
+.lineItems {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lineItemHeader {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.lineItem {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.addLineItemButton {
+  margin-top: 1rem !important;
+  background: transparent !important;
+  border: 1px solid #52a8ec !important;
+  color: #52a8ec !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.addLineItemButton:hover {
+  background: rgba(82, 168, 236, 0.1) !important;
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.backButton {
+  background: transparent !important;
+  border: 1px solid #52a8ec !important;
+  color: #52a8ec !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.backButton:hover {
+  background: rgba(82, 168, 236, 0.1) !important;
+}
+
+.submitButton {
+  background: #52a8ec !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.submitButton:hover {
+  background: #3994d6 !important;
+}
+
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .lineItemHeader {
+    display: none;
+  }
+
+  .lineItem {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  .formActions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .backButton,
+  .submitButton {
+    width: 100%;
+  }
+} 
