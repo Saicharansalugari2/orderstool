@@ -23,16 +23,13 @@ const OrdersByCustomerChart: React.FC = () => {
 
   const { amountsByCustomer, maxAmount } = useMemo(() => {
     const amounts = orders.reduce<Record<string, number>>((acc, order) => {
-      if (order.customer) {
-        acc[order.customer] = (acc[order.customer] || 0) + (order.amount || 0);
-      }
-      return acc;
-    }, {});
+    if (order.customer) {
+      acc[order.customer] = (acc[order.customer] || 0) + (order.amount || 0);
+    }
+    return acc;
+  }, {});
     
-    // Convert Object.values to number[] explicitly and handle empty case
-    const amountValues = Object.values(amounts) as number[];
-    const max = amountValues.length > 0 ? Math.max(...amountValues) : 0;
-    
+    const max = Math.max(...Object.values(amounts));
     return { amountsByCustomer: amounts, maxAmount: max };
   }, [orders]);
 
