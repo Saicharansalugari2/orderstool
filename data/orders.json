@@ -1,9 +1,242 @@
 [
   {
+    "orderNumber": "ORD-0001",
+    "customer": "Acme Corporation",
+    "transactionDate": "2025-05-01",
+    "status": "Cancelled",
+    "fromLocation": "Warehouse A",
+    "toLocation": "Retail Store B",
+    "pendingApprovalReasonCode": [
+      "PRICE_DISCREPANCY",
+      "CREDIT_HOLD"
+    ],
+    "supportRep": "John Doe",
+    "incoterm": "",
+    "freightTerms": "Prepaid",
+    "totalShipUnitCount": 5,
+    "totalQuantity": 100,
+    "discountRate": 0.05,
+    "billingAddress": {
+      "street": "123 Elm St",
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62701",
+      "country": "USA"
+    },
+    "shippingAddress": {
+      "street": "456 Oak Ave",
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62702",
+      "country": "USA"
+    },
+    "earlyPickupDate": "2025-05-03",
+    "latePickupDate": "2025-05-05",
+    "lines": [
+      {
+        "item": "Widget A",
+        "units": "Box",
+        "quantity": 2,
+        "price": 25,
+        "amount": 50
+      },
+      {
+        "item": "Gadget B",
+        "units": "Each",
+        "quantity": 1,
+        "price": 40,
+        "amount": 40
+      },
+      {
+        "item": "Part C",
+        "units": "Pack",
+        "quantity": 1,
+        "price": 10,
+        "amount": 10
+      }
+    ],
+    "history": [
+      {
+        "timestamp": "2025-05-01T08:00:00Z",
+        "event": "Order Created"
+      },
+      {
+        "timestamp": "2025-05-01T09:00:00Z",
+        "event": "Payment Received"
+      },
+      {
+        "timestamp": "2025-05-01T11:00:00Z",
+        "event": "Order Approved"
+      },
+      {
+        "timestamp": "2025-05-03T15:00:00Z",
+        "event": "Shipped"
+      },
+      {
+        "timestamp": "2025-05-05T14:30:00Z",
+        "event": "Delivered"
+      }
+    ]
+  },
+  {
+    "orderNumber": "ORD-0002",
+    "customer": "Globex LLC",
+    "transactionDate": "2025-05-02",
+    "status": "Approved",
+    "fromLocation": "Warehouse B",
+    "toLocation": "Distributor C",
+    "pendingApprovalReasonCode": [],
+    "supportRep": "Jane Smith",
+    "incoterm": "",
+    "freightTerms": "Collect",
+    "totalShipUnitCount": 3,
+    "totalQuantity": 60,
+    "discountRate": 0.1,
+    "billingAddress": {
+      "street": "789 Maple Rd",
+      "city": "Metropolis",
+      "state": "NY",
+      "postalCode": "10001",
+      "country": "USA"
+    },
+    "shippingAddress": {
+      "street": "101 Pine St",
+      "city": "Metropolis",
+      "state": "NY",
+      "postalCode": "10002",
+      "country": "USA"
+    },
+    "earlyPickupDate": "2025-05-04",
+    "latePickupDate": "2025-05-06",
+    "lines": [
+      {
+        "item": "Item 1",
+        "units": "Each",
+        "quantity": 1,
+        "price": 20,
+        "amount": 20
+      },
+      {
+        "item": "Item 2",
+        "units": "Box",
+        "quantity": 2,
+        "price": 15,
+        "amount": 30
+      },
+      {
+        "item": "Item 3",
+        "units": "Pack",
+        "quantity": 1,
+        "price": 10,
+        "amount": 10
+      }
+    ],
+    "history": [
+      {
+        "timestamp": "2025-05-02T10:30:00Z",
+        "event": "Order Created"
+      },
+      {
+        "timestamp": "2025-05-02T11:15:00Z",
+        "event": "Payment Received"
+      },
+      {
+        "timestamp": "2025-05-03T09:00:00Z",
+        "event": "Order Approved"
+      },
+      {
+        "timestamp": "2025-05-04T16:00:00Z",
+        "event": "Shipped"
+      },
+      {
+        "timestamp": "2025-05-06T10:00:00Z",
+        "event": "Delivered"
+      }
+    ]
+  },
+  {
+    "orderNumber": "ORD-0003",
+    "customer": "Initech",
+    "transactionDate": "2025-05-03",
+    "status": "Approved",
+    "fromLocation": "Warehouse C",
+    "toLocation": "Office Park D",
+    "pendingApprovalReasonCode": [
+      "STOCK_SHORTAGE"
+    ],
+    "supportRep": "Alice Johnson",
+    "incoterm": "",
+    "freightTerms": "Prepaid",
+    "totalShipUnitCount": 10,
+    "totalQuantity": 200,
+    "discountRate": 0,
+    "billingAddress": {
+      "street": "234 Birch Ln",
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62703",
+      "country": "USA"
+    },
+    "shippingAddress": {
+      "street": "567 Cedar Ct",
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62704",
+      "country": "USA"
+    },
+    "earlyPickupDate": "2025-05-05",
+    "latePickupDate": "2025-05-07",
+    "lines": [
+      {
+        "item": "Item X",
+        "units": "Each",
+        "quantity": 2,
+        "price": 15,
+        "amount": 30
+      },
+      {
+        "item": "Item Y",
+        "units": "Box",
+        "quantity": 1,
+        "price": 30,
+        "amount": 30
+      },
+      {
+        "item": "Item Z",
+        "units": "Pack",
+        "quantity": 1,
+        "price": 20,
+        "amount": 20
+      }
+    ],
+    "history": [
+      {
+        "timestamp": "2025-05-03T09:45:00Z",
+        "event": "Order Created"
+      },
+      {
+        "timestamp": "2025-05-03T10:30:00Z",
+        "event": "Stock Check Pending"
+      },
+      {
+        "timestamp": "2025-05-04T08:00:00Z",
+        "event": "Order Approved"
+      },
+      {
+        "timestamp": "2025-05-05T14:00:00Z",
+        "event": "Shipped"
+      },
+      {
+        "timestamp": "2025-05-07T13:00:00Z",
+        "event": "Delivered"
+      }
+    ]
+  },
+  {
     "orderNumber": "ORD-0004",
     "customer": "Umbrella Corp",
     "transactionDate": "2025-05-04",
-    "status": "Shipped",
+    "status": "Cancelled",
     "fromLocation": "Warehouse D",
     "toLocation": "Hospital E",
     "pendingApprovalReasonCode": [
@@ -33,7 +266,6 @@
     "latePickupDate": "2025-05-08",
     "lines": [
       {
-        "id": "line-001",
         "item": "Item X",
         "units": "Each",
         "quantity": 2,
@@ -41,7 +273,6 @@
         "amount": 30
       },
       {
-        "id": "line-002",
         "item": "Item Y",
         "units": "Box",
         "quantity": 1,
@@ -49,7 +280,6 @@
         "amount": 30
       },
       {
-        "id": "line-003",
         "item": "Item Z",
         "units": "Pack",
         "quantity": 1,
@@ -72,7 +302,7 @@
     "orderNumber": "ORD-0005",
     "customer": "Wayne Enterprises",
     "transactionDate": "2025-05-05",
-    "status": "Cancelled",
+    "status": "Pending",
     "fromLocation": "Warehouse A",
     "toLocation": "Gotham HQ",
     "pendingApprovalReasonCode": [
@@ -150,7 +380,7 @@
     "orderNumber": "ORD-0006",
     "customer": "Stark Industries",
     "transactionDate": "2025-05-06",
-    "status": "Shipped",
+    "status": "Approved",
     "fromLocation": "Warehouse B",
     "toLocation": "Avengers Tower",
     "pendingApprovalReasonCode": [],
@@ -226,7 +456,7 @@
     "orderNumber": "ORD-0007",
     "customer": "Oscorp",
     "transactionDate": "2025-05-07",
-    "status": "Approved",
+    "status": "Shipped",
     "fromLocation": "Warehouse C",
     "toLocation": "Research Lab F",
     "pendingApprovalReasonCode": [
@@ -426,7 +656,7 @@
     "orderNumber": "ORD-0009",
     "customer": "Tyrell Corporation",
     "transactionDate": "2025-05-09",
-    "status": "Pending",
+    "status": "Approved",
     "fromLocation": "Warehouse A",
     "toLocation": "Blade Runner Unit",
     "pendingApprovalReasonCode": [
@@ -529,7 +759,7 @@
     "orderNumber": "ORD-0010",
     "customer": "Black Mesa",
     "transactionDate": "2025-05-10",
-    "status": "Approved",
+    "status": "Shipped",
     "fromLocation": "Warehouse B",
     "toLocation": "Research Facility",
     "pendingApprovalReasonCode": [
@@ -629,289 +859,36 @@
     ]
   },
   {
-    "orderNumber": "ORD-0002",
-    "customer": "Globex LLC",
-    "orderCreatedDate": "2025-05-02T04:00:00.000Z",
-    "dueDate": "2025-06-02T04:00:00.000Z",
-    "status": "Approved",
+    "orderNumber": "ORD-0099",
+    "customer": "Test Order",
+    "transactionDate": "2025-06-01T04:00:00.000Z",
+    "status": "Pending",
     "fromLocation": "Warehouse B",
-    "toLocation": "Distributor C",
-    "pendingApprovalReasonCodes": [
-      "STOCK_SHORTAGE"
-    ],
-    "supportRep": "Jane Smith",
-    "incoterm": "",
-    "freightTerms": "Collect",
-    "totalShipUnitCount": "3",
-    "totalQuantity": "60",
-    "discountRate": "1",
-    "billingAddress": "Metropolis,NY",
-    "shippingAddress": "Metropolis,NY",
-    "earlyPickupDate": "2025-05-04T04:00:00.000Z",
-    "latePickupDate": "2025-05-06T04:00:00.000Z",
-    "lines": [
-      {
-        "id": 1,
-        "item": "Pans",
-        "units": "Set",
-        "quantity": 1,
-        "price": 20,
-        "amount": 20
-      },
-      {
-        "id": 2,
-        "item": "Cups and Lids",
-        "units": "Box",
-        "quantity": 2,
-        "price": 15,
-        "amount": 30
-      },
-      {
-        "id": 3,
-        "item": "Gloves",
-        "units": "Pack",
-        "quantity": 1,
-        "price": 10,
-        "amount": 10
-      }
-    ],
-    "totalAmount": 60
-  },
-  {
-    "orderNumber": "ORD-0003",
-    "customer": "Initech ",
-    "orderCreatedDate": "2025-05-03T04:00:00.000Z",
-    "dueDate": "2025-05-26T04:00:00.000Z",
-    "status": "Cancelled",
-    "fromLocation": "Warehouse C",
-    "toLocation": "Office Park D",
-    "pendingApprovalReasonCodes": [
-      "STOCK_SHORTAGE"
-    ],
-    "supportRep": "Alice Johnson",
-    "incoterm": "",
-    "freightTerms": "Prepaid",
-    "totalShipUnitCount": "10",
-    "totalQuantity": "200",
-    "discountRate": "0",
-    "billingAddress": "Springfield,IL",
-    "shippingAddress": "Springfield,IL",
-    "earlyPickupDate": "2025-05-05T04:00:00.000Z",
-    "latePickupDate": "2025-05-07T04:00:00.000Z",
-    "lines": [
-      {
-        "id": 1,
-        "item": "Pans",
-        "units": "Piece",
-        "quantity": 2,
-        "price": 15,
-        "amount": 30
-      },
-      {
-        "id": 2,
-        "item": "Cutlery",
-        "units": "Box",
-        "quantity": 1,
-        "price": 30,
-        "amount": 30
-      },
-      {
-        "id": 3,
-        "item": "Gloves",
-        "units": "Set",
-        "quantity": 1,
-        "price": 20,
-        "amount": 20
-      }
-    ],
-    "totalAmount": 80
-  },
-  {
-    "orderNumber": "ORD-0020",
-    "customer": "Daxwell Corp",
-    "transactionDate": "2025-05-07T04:00:00.000Z",
-    "status": "Approved",
-    "fromLocation": "Warehouse B",
-    "toLocation": "Houston",
-    "pendingApprovalReasonCodes": [
-      "STOCK_SHORTAGE",
-      "PRICE_DISCREPANCY"
-    ],
-    "supportRep": "sai charan",
-    "incoterm": "",
-    "freightTerms": "Collect",
-    "totalShipUnitCount": "2",
-    "totalQuantity": "2",
-    "discountRate": "0.10",
-    "billingAddress": "Houston,TX",
-    "shippingAddress": "Houston,TX",
-    "earlyPickupDate": "2025-05-28T04:00:00.000Z",
-    "latePickupDate": "2025-05-30T04:00:00.000Z",
-    "lines": [
-      {
-        "id": 1,
-        "item": "Masks",
-        "units": "Pack",
-        "quantity": 1,
-        "price": 10,
-        "amount": 10
-      },
-      {
-        "id": 2,
-        "item": "Cutlery",
-        "units": "Set",
-        "quantity": 4,
-        "price": 10,
-        "amount": 40
-      },
-      {
-        "id": 3,
-        "item": "Gloves",
-        "units": "Piece",
-        "quantity": 10,
-        "price": 10,
-        "amount": 100
-      }
-    ],
-    "totalAmount": 150
-  },
-  {
-    "orderNumber": "ORD-0019",
-    "customer": "WQI Corporation",
-    "transactionDate": "2025-05-08T04:00:00.000Z",
-    "status": "Approved",
-    "fromLocation": "Warehouse A",
     "toLocation": "Office Park D",
     "pendingApprovalReasonCodes": [
       "CREDIT_HOLD",
-      "PRICE_DISCREPANCY"
-    ],
-    "supportRep": "Alice Johnson",
-    "incoterm": "EXW",
-    "freightTerms": "",
-    "totalShipUnitCount": "1",
-    "totalQuantity": "1",
-    "discountRate": "0.20",
-    "billingAddress": "1 Nelson ave, Jersey City, USA",
-    "shippingAddress": "1 Nelson ave, Jersey City, USA",
-    "earlyPickupDate": "2025-05-21T04:00:00.000Z",
-    "latePickupDate": "2025-05-26T04:00:00.000Z",
-    "lines": [
-      {
-        "id": 1,
-        "item": "Cutlery",
-        "units": "Set",
-        "quantity": 1,
-        "price": 120,
-        "amount": 120
-      }
-    ],
-    "totalAmount": 120
-  },
-  {
-    "orderNumber": "ORD-0017",
-    "customer": "SAI Charan Industries",
-    "transactionDate": "2025-05-29T04:00:00.000Z",
-    "status": "Approved",
-    "fromLocation": "Warehouse B",
-    "toLocation": "Houston",
-    "pendingApprovalReasonCodes": [
-      "CREDIT_HOLD",
-      "PRICE_DISCREPANCY"
+      "CUSTOMER_REQUEST"
     ],
     "supportRep": "sai charan",
     "incoterm": "",
     "freightTerms": "Collect",
     "totalShipUnitCount": "1",
-    "totalQuantity": "1",
-    "discountRate": "0.35",
-    "billingAddress": "7 Neslon ave ,TX",
-    "shippingAddress": "7 Neslon ave ,TX",
-    "earlyPickupDate": "2025-05-27T04:00:00.000Z",
-    "latePickupDate": "2025-05-28T04:00:00.000Z",
-    "lines": [
-      {
-        "id": 1,
-        "item": "Masks",
-        "units": "Box",
-        "quantity": 1,
-        "price": 120,
-        "amount": 120
-      }
-    ],
-    "totalAmount": 120
-  },
-  {
-    "orderNumber": "ORD-0019",
-    "customer": "SAI Corporation",
-    "transactionDate": "2025-05-31T04:00:00.000Z",
-    "status": "Pending",
-    "fromLocation": "Warehouse B",
-    "toLocation": "Retail Store B",
-    "pendingApprovalReasonCodes": [
-      "CREDIT_HOLD"
-    ],
-    "supportRep": "sai salugari",
-    "incoterm": "FOB",
-    "freightTerms": "",
-    "totalShipUnitCount": "",
-    "totalQuantity": "",
-    "discountRate": "0.45",
-    "billingAddress": "",
-    "shippingAddress": "",
-    "earlyPickupDate": null,
-    "latePickupDate": null,
-    "lines": [
-      {
-        "id": 1,
-        "item": "Masks",
-        "units": "Pack",
-        "quantity": 1,
-        "price": 100,
-        "amount": 100
-      }
-    ],
-    "totalAmount": 100
-  },
-  {
-    "orderNumber": "ORD-0001",
-    "customer": "Acme Corporation",
-    "transactionDate": "2025-05-01T04:00:00.000Z",
-    "status": "Pending",
-    "fromLocation": "Warehouse A",
-    "toLocation": "Retail Store B",
-    "pendingApprovalReasonCodes": [
-      "PRICE_DISCREPANCY",
-      "CREDIT_HOLD"
-    ],
-    "supportRep": "John Doe",
-    "incoterm": "",
-    "freightTerms": "Prepaid",
-    "totalShipUnitCount": "5",
     "totalQuantity": "100",
-    "discountRate": "0.05",
-    "billingAddress": "123 Elm St,Springfield,IL,62701,USA",
-    "shippingAddress": "456 Oak Ave,Springfield,IL,62702,USA",
-    "earlyPickupDate": "2025-05-03T04:00:00.000Z",
-    "latePickupDate": "2025-05-05T04:00:00.000Z",
+    "discountRate": "0",
+    "billingAddress": "123 Replicant Blvd,Los Angeles,CA,90002,USA",
+    "shippingAddress": "123 Replicant Blvd,Los Angeles,CA,90002,USA",
+    "earlyPickupDate": "2025-06-02T04:00:00.000Z",
+    "latePickupDate": "2025-06-09T04:00:00.000Z",
     "lines": [
       {
         "id": 1,
         "item": "Gloves",
-        "units": "Box",
-        "quantity": 2,
-        "price": 25,
-        "amount": 50
-      },
-      {
-        "id": 2,
-        "item": "Cutlery",
-        "units": "Piece",
-        "quantity": 1,
-        "price": 40,
-        "amount": 40
+        "units": "Pack",
+        "quantity": 10,
+        "price": 11,
+        "amount": 110
       }
     ],
-    "totalAmount": 90
+    "totalAmount": 110
   }
 ]
