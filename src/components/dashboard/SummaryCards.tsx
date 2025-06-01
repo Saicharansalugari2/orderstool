@@ -62,7 +62,7 @@ const DashboardSummaryCards: React.FC = () => {
       borderGlow: "rgba(76, 175, 80, 0.5)",
     },
     {
-      label: "Average Order Amount",
+      label: "Average Order",
       value: avgAmount,
       icon: <MonetizationOnIcon aria-label="Average Order Amount" sx={{ fontSize: { xs: 28, md: 38 }, color: "#ff9800" }} />,
       prefix: "$",
@@ -129,13 +129,16 @@ const DashboardSummaryCards: React.FC = () => {
   return (
     <Grid
       container
-      spacing={{ xs: 1.5, md: 2 }}
+      spacing={{ xs: 3, md: 4 }}
       alignItems="stretch"
       sx={{
-        ml: 4,
+        ml: 0,
         mt: 3,
-        maxWidth: '98%',
+        maxWidth: '100%',
         position: "relative",
+        px: 2,
+        justifyContent: 'center',
+        gap: { xs: 2, md: 3 },
         "& .cardBlur": {
           filter: hoveredIndex !== null ? "blur(4px) brightness(0.6)" : "none",
           transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -148,8 +151,8 @@ const DashboardSummaryCards: React.FC = () => {
         <Grid
           item
           xs={12}
-          sm={6}
-          md={3}
+          sm={5.5}
+          md={2.6}
           key={label}
           onMouseEnter={() => setHoveredIndex(index)}
           onMouseLeave={() => setHoveredIndex(null)}
@@ -160,6 +163,7 @@ const DashboardSummaryCards: React.FC = () => {
             position: "relative",
             zIndex: hoveredIndex === index ? 10 : 1,
             transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+            mx: { xs: 0, sm: 1, md: 1.5 },
           }}
           className={hoveredIndex !== index && hoveredIndex !== null ? "cardBlur" : ""}
         >
@@ -167,8 +171,8 @@ const DashboardSummaryCards: React.FC = () => {
             elevation={4}
             sx={{
               flexGrow: 1,
-              minHeight: 100,
-              maxWidth: { xs: '100%', sm: '320px' },
+              minHeight: 120,
+              maxWidth: { xs: '100%', sm: '340px' },
               minWidth: { xs: '100%', sm: '280px' },
               border: "2px solid",
               borderRadius: "16px",
@@ -180,22 +184,15 @@ const DashboardSummaryCards: React.FC = () => {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              px: 4,
-              py: 2.25,
-              boxShadow: hoveredIndex === index
-                      ? `0 15px 30px rgba(0,0,0,0.4), 0 0 15px ${borderGlow}`
-                      : "0 6px 15px rgba(0,0,0,0.2)",
-              borderColor: hoveredIndex === index 
-                        ? borderGlow.replace(", 0.5)", ", 0.8)") 
-                        : `${borderGlow.replace(", 0.5)", ", 0.4)")}`,
+              px: 5,
+              py: 2,
+              boxShadow: `0 15px 30px rgba(0,0,0,0.4), 0 0 15px ${borderGlow}`,
+              borderColor: borderGlow.replace(", 0.5)", ", 0.8)"),
               cursor: "pointer",
               userSelect: "none",
               transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
               transformOrigin: "center",
-              transform: hoveredIndex === index ? "scale(1.05) translateY(-5px)" : "scale(1) translateY(0)",
-              "&:hover": {
-                      borderColor: borderGlow,
-                    },
+              transform: "scale(1.05) translateY(-5px)",
               "&::before": {
                 content: '""',
                 position: "absolute",
@@ -205,10 +202,6 @@ const DashboardSummaryCards: React.FC = () => {
                 bottom: 0,
                 borderRadius: "16px",
                 background: "linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent)",
-                opacity: 0,
-                transition: "opacity 0.5s ease",
-              },
-              "&:hover::before": {
                 opacity: 1,
               },
             }}
@@ -217,8 +210,8 @@ const DashboardSummaryCards: React.FC = () => {
               display="flex" 
               alignItems="center" 
               justifyContent="center"
-              gap={2}
-              mb={1}
+              gap={3}
+              mb={2}
               width="100%"
               sx={{
                 position: "relative",
@@ -230,70 +223,50 @@ const DashboardSummaryCards: React.FC = () => {
                   bottom: -3,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: hoveredIndex === index ? "80%" : "0%",
+                  width: "80%",
                   height: "1px",
                   background: borderGlow,
-                  transition: "width 0.3s ease",
-        },
-      }}
-    >
+                },
+              }}
+            >
               {React.cloneElement(icon, { 
                 sx: { 
-                  fontSize: { xs: 26, md: 32 },
+                  fontSize: { xs: 24, md: 30 },
                   color: icon.props.sx.color,
-                  transition: "transform 0.3s ease",
-                  transform: hoveredIndex === index ? "scale(1.1)" : "scale(1)",
+                  transform: "scale(1.1)",
                 } 
               })}
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 700,
-            letterSpacing: 0.5,
-                  color: "#fff",
-                  textAlign: "left",
-                  textShadow: hoveredIndex === index ? "0 0 8px rgba(255,255,255,0.5)" : "none",
-            userSelect: "none",
-                  fontSize: { xs: "0.8rem", md: "0.9rem" },
-                  transition: "all 0.3s ease",
-          }}
-        >
-          {label}
-        </Typography>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-                width: "100%",
-                mt: 1,
-        }}
-      >
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          textAlign="center"
-          sx={{
-            userSelect: "none",
-                  fontSize: { xs: "1.2rem", md: "1.4rem" },
-                  color: "#fff",
-                  textShadow: hoveredIndex === index ? "0 0 15px rgba(255,255,255,0.5)" : "none",
-                  transition: "all 0.3s ease",
-          }}
-        >
-          <CountUp
-            end={value}
-            prefix={prefix}
-            decimals={decimals}
-                  duration={12}
-            separator=","
-          />
-        </Typography>
-      </Box>
-    </Card>
-  </Grid>
-))}
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: '0.85rem', md: '0.95rem' },
+                  letterSpacing: 0.5,
+                }}
+              >
+                {label}
+              </Typography>
+            </Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                fontSize: { xs: '1.25rem', md: '1.5rem' },
+                letterSpacing: 1,
+              }}
+            >
+              <CountUp
+                start={0}
+                end={value}
+                prefix={prefix}
+                decimals={decimals}
+                duration={2}
+                separator=","
+              />
+            </Typography>
+          </Card>
+        </Grid>
+      ))}
     </Grid>
   );
 };

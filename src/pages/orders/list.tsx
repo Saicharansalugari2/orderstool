@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -25,6 +25,9 @@ import {
   Grid,
   Card,
   Typography,
+  useTheme,
+  useMediaQuery,
+  Chip,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -112,6 +115,8 @@ export default function OrderListPage() {
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -371,6 +376,152 @@ export default function OrderListPage() {
     },
   ];
 
+  const renderMobileCard = (order: OrderWithTotal) => {
+    const statusInfo = statusOptions.find(s => s.value === order.status);
+    
+    return (
+      <Card 
+        key={order.orderNumber}
+        onClick={() => router.push(`/orders/${encodeURIComponent(order.orderNumber)}`)}
+        sx={{
+          mb: 2,
+          p: 2,
+          position: 'relative',
+          bgcolor: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${statusInfo?.color || '#fff'}40`,
+          borderRadius: 2,
+          boxShadow: `0 4px 12px ${statusInfo?.color || '#fff'}20`,
+          transition: 'all 0.3s ease',
+          cursor: 'pointer',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: `0 8px 16px ${statusInfo?.color || '#fff'}30`,
+            bgcolor: 'rgba(255, 255, 255, 0.08)',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#fff', mb: 0.5 }}>
+              Order #{order.orderNumber}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+              {formatDate(order.transactionDate)}
+            </Typography>
+          </Box>
+          <FormControl 
+            size="small" 
+            onClick={(e) => e.stopPropagation()}
+            sx={{ minWidth: 130 }}
+          >
+            <Select
+              value={order.status}
+              onChange={(e) => handleStatusChange(order.orderNumber, e.target.value)}
+              disabled={updatingStatus === order.orderNumber}
+              sx={{
+                height: '32px',
+                color: statusInfo?.color || 'inherit',
+                bgcolor: `${statusInfo?.color}15`,
+                '& .MuiSelect-select': {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  py: 0.5,
+                  pl: 1
+                }
+              }}
+            >
+              {statusOptions.map((option) => (
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  sx={{
+                    color: option.color,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    '&.Mui-selected': {
+                      backgroundColor: `${option.color}15`,
+                      color: option.color
+                    },
+                    '&:hover': {
+                      backgroundColor: `${option.color}10`
+                    }
+                  }}
+                >
+                  {updatingStatus === order.orderNumber && option.value === order.status ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CircularProgress size={16} sx={{ color: option.color }} />
+                      {option.label}
+                    </Box>
+                  ) : (
+                    <>
+                      {React.cloneElement(option.icon, { sx: { color: option.color } })}
+                      {option.label}
+                    </>
+                  )}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+        
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ fontWeight: 500, color: '#fff', mb: 0.5 }}>
+            {order.customer}
+          </Typography>
+          <Typography variant="h6" sx={{ color: statusInfo?.color || '#fff', fontWeight: 600 }}>
+            {formatCurrency(order.totalAmount)}
+          </Typography>
+        </Box>
+
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            gap: 1, 
+            justifyContent: 'flex-end',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            pt: 2
+          }}
+        >
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewOrder(order.orderNumber);
+            }}
+            sx={{
+              color: '#fff',
+              bgcolor: 'rgba(255,255,255,0.1)',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.2)',
+              }
+            }}
+          >
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMenuOpen(e, order.orderNumber);
+            }}
+            sx={{
+              color: '#fff',
+              bgcolor: 'rgba(255,255,255,0.1)',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.2)',
+              }
+            }}
+          >
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Card>
+    );
+  };
+
   return (
     <Box className={styles.container}>
       {/* Summary Cards Section */}
@@ -475,7 +626,8 @@ export default function OrderListPage() {
       {/* Header Section */}
       <Box className={styles.header} sx={{ 
         display: 'flex',
-        alignItems: 'center',
+        flexDirection: { xs: 'column', md: 'row' },
+        alignItems: { xs: 'stretch', md: 'center' },
         justifyContent: 'space-between',
         gap: 2,
         mb: 3,
@@ -483,12 +635,10 @@ export default function OrderListPage() {
       }}>
         <Box className={styles.searchContainer} sx={{ 
           width: '100%',
-          maxWidth: '600px',
+          maxWidth: { xs: '100%', md: '600px' },
           display: 'flex',
           alignItems: 'center',
-          position: 'relative',
-          ml: { xs: 0, md: 'auto' },
-          mr: { xs: 0, md: 4 }
+          position: 'relative'
         }}>
           <TextField
             placeholder="Search orders..."
@@ -499,11 +649,11 @@ export default function OrderListPage() {
             className={styles.searchInput}
             InputProps={{
               startAdornment: (
-                <SearchIcon sx={{ color: 'action.active', mr: 1, fontSize: '28px' }} />
+                <SearchIcon sx={{ color: 'action.active', mr: 1, fontSize: { xs: '24px', md: '28px' } }} />
               ),
               sx: {
-                height: '48px',
-                fontSize: '1.1rem',
+                height: { xs: '42px', md: '48px' },
+                fontSize: { xs: '1rem', md: '1.1rem' },
                 '& .MuiOutlinedInput-notchedOutline': {
                   borderWidth: '2px'
                 }
@@ -513,16 +663,15 @@ export default function OrderListPage() {
         </Box>
         <Button
           variant="contained"
-          endIcon={<FileDownloadIcon sx={{ fontSize: '28px' }} />}
+          endIcon={<FileDownloadIcon sx={{ fontSize: { xs: '24px', md: '28px' } }} />}
           onClick={handleExport}
           className={styles.exportButton}
           sx={{
+            width: { xs: '100%', md: 'auto' },
             minWidth: 'fit-content',
-            ml: { xs: 0, md: 0 },
-            mr: { xs: 0, md: 'auto' },
-            height: '48px',
-            px: 4,
-            fontSize: '1.1rem',
+            height: { xs: '42px', md: '48px' },
+            px: { xs: 2, md: 4 },
+            fontSize: { xs: '1rem', md: '1.1rem' },
             fontWeight: 600,
             borderRadius: '8px',
             textTransform: 'none',
@@ -543,7 +692,9 @@ export default function OrderListPage() {
         <Tabs 
           value={statusFilter} 
           onChange={handleTabChange} 
-          sx={{
+          variant={isMobile ? "scrollable" : "standard"}
+          scrollButtons={isMobile ? "auto" : false}
+          sx={{ 
             px: 2,
             pt: 2,
             borderBottom: 1,
@@ -610,236 +761,242 @@ export default function OrderListPage() {
         </Tabs>
       </Box>
 
-      {/* Orders Table */}
-      <TableContainer 
-        component={Paper} 
-        className={styles.tableContainer}
-        sx={{
-          backgroundColor: 'transparent',
-          boxShadow: 'none',
-          '& .MuiTable-root': {
-            borderCollapse: 'separate',
-            borderSpacing: '0 8px'
-          }
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: '#2a2a2a' }}>
-              <TableCell sx={{ fontWeight: 600, color: '#fff', width: '15%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
-                <TableSortLabel
-                  active={sortField === 'orderNumber'}
-                  direction={sortField === 'orderNumber' ? sortOrder : 'asc'}
-                  onClick={() => handleSort('orderNumber')}
-                  sx={{
-                    color: '#fff !important',
-                    '& .MuiTableSortLabel-icon': {
-                      color: '#FF6B6B !important',
-                      fontSize: '1.5rem',
-                      opacity: '1 !important',
-                    },
-                    '&.Mui-active': {
-                      color: '#fff !important',
-                    },
-                  }}
-                >
-                  Order #Id
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#fff', width: '20%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
-                <TableSortLabel
-                  active={sortField === 'customer'}
-                  direction={sortField === 'customer' ? sortOrder : 'asc'}
-                  onClick={() => handleSort('customer')}
-                  sx={{
-                    color: '#fff !important',
-                    '& .MuiTableSortLabel-icon': {
-                      color: '#4ECDC4 !important',
-                      fontSize: '1.5rem',
-                      opacity: '1 !important',
-                    },
-                    '&.Mui-active': {
-                      color: '#fff !important',
-                    },
-                  }}
-                >
-                  Customer Name
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#fff', width: '20%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
-                <TableSortLabel
-                  active={sortField === 'transactionDate'}
-                  direction={sortField === 'transactionDate' ? sortOrder : 'asc'}
-                  onClick={() => handleSort('transactionDate')}
-                  sx={{
-                    color: '#fff !important',
-                    '& .MuiTableSortLabel-icon': {
-                      color: '#FFD93D !important',
-                      fontSize: '1.5rem',
-                      opacity: '1 !important',
-                    },
-                    '&.Mui-active': {
-                      color: '#fff !important',
-                    },
-                  }}
-                >
-                  Transaction Date
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#fff', width: '15%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
-                <TableSortLabel
-                  active={sortField === 'totalAmount'}
-                  direction={sortField === 'totalAmount' ? sortOrder : 'asc'}
-                  onClick={() => handleSort('totalAmount')}
-                  sx={{
-                    color: '#fff !important',
-                    '& .MuiTableSortLabel-icon': {
-                      color: '#6C9BCF !important',
-                      fontSize: '1.5rem',
-                      opacity: '1 !important',
-                    },
-                    '&.Mui-active': {
-                      color: '#fff !important',
-                    },
-                  }}
-                >
-                  Amount
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#fff', width: '20%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
-                <TableSortLabel
-                  active={sortField === 'status'}
-                  direction={sortField === 'status' ? sortOrder : 'asc'}
-                  onClick={() => handleSort('status')}
-                  sx={{
-                    color: '#fff !important',
-                    '& .MuiTableSortLabel-icon': {
-                      color: '#BA94D1 !important',
-                      fontSize: '1.5rem',
-                      opacity: '1 !important',
-                    },
-                    '&.Mui-active': {
-                      color: '#fff !important',
-                    },
-                  }}
-                >
-                  Order-Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#fff', width: '10%', padding: '16px', paddingLeft: '0px', textAlign: 'left', '&:last-of-type': { borderTopRightRadius: '12px' } }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedOrders.map((order) => (
-              <TableRow 
-                key={order.orderNumber} 
-                className={styles.tableRow}
-                onClick={() => router.push(`/orders/${encodeURIComponent(order.orderNumber)}`)}
-                sx={{
-                  transition: 'all 0.2s ease',
-                  my: 1,
-                  cursor: 'pointer',
-                  '& td': {
-                    color: '#fff',
-                    borderBottom: 'none',
-                  },
-                  '& td:first-of-type': {
-                    borderTopLeftRadius: '8px',
-                    borderBottomLeftRadius: '8px',
-                  },
-                  '& td:last-of-type': {
-                    borderTopRightRadius: '8px',
-                    borderBottomRightRadius: '8px',
-                  },
-                  '&:hover': {
-                    backgroundColor: order.status === 'Pending' ? 'rgba(255, 152, 0, 0.45) !important' :
-                                   order.status === 'Approved' ? 'rgba(76, 175, 80, 0.45) !important' :
-                                   order.status === 'Shipped' ? 'rgba(33, 150, 243, 0.65) !important' :
-                                   order.status === 'Cancelled' ? 'rgba(244, 67, 54, 0.45) !important' :
-                                   'rgba(255, 255, 255, 0.2) !important',
-                    '& td': {
-                      color: '#fff'
-                    }
-                  }
-                }}
-              >
-                <TableCell sx={{ padding: '16px' }}>{order.orderNumber}</TableCell>
-                <TableCell sx={{ padding: '16px' }}>{order.customer}</TableCell>
-                <TableCell sx={{ padding: '16px' }}>{formatDate(order.transactionDate)}</TableCell>
-                <TableCell sx={{ padding: '16px' }}>{formatCurrency(order.totalAmount)}</TableCell>
-                <TableCell sx={{ padding: '16px' }}>
-                  <FormControl size="small" onClick={(e) => e.stopPropagation()}>
-                    <Select
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(order.orderNumber, e.target.value)}
-                      disabled={updatingStatus === order.orderNumber}
-                      sx={{
-                        minWidth: 120,
-                        color: statusOptions.find(opt => opt.value === order.status)?.color || 'inherit',
-                        '& .MuiSelect-select': {
-                          padding: '6px 12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1
-                        }
-                      }}
-                    >
-                      {statusOptions.map((option) => (
-                        <MenuItem
-                          key={option.value}
-                          value={option.value}
-                          sx={{
-                            color: option.color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            '&.Mui-selected': {
-                              backgroundColor: `${option.color}15`,
-                              color: option.color
-                            },
-                            '&:hover': {
-                              backgroundColor: `${option.color}10`
-                            }
-                          }}
-                        >
-                          {updatingStatus === order.orderNumber && option.value === order.status ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <CircularProgress size={16} sx={{ color: option.color }} />
-                              {option.label}
-                            </Box>
-                          ) : (
-                            <>
-                              {React.cloneElement(option.icon, { sx: { color: option.color } })}
-                              {option.label}
-                            </>
-                          )}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </TableCell>
-                <TableCell sx={{ padding: '16px', paddingLeft: '0px', textAlign: 'left' }}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMenuOpen(e, order.orderNumber);
-                    }}
-                    size="small"
+      {/* Orders Table/Cards Section */}
+      {isMobile ? (
+        <Box sx={{ px: 2 }}>
+          {paginatedOrders.map((order) => renderMobileCard(order))}
+        </Box>
+      ) : (
+        <TableContainer 
+          component={Paper} 
+          className={styles.tableContainer}
+          sx={{
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            '& .MuiTable-root': {
+              borderCollapse: 'separate',
+              borderSpacing: '0 8px'
+            }
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#2a2a2a' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#fff', width: '15%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
+                  <TableSortLabel
+                    active={sortField === 'orderNumber'}
+                    direction={sortField === 'orderNumber' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('orderNumber')}
                     sx={{
-                      color: '#666',
-                      '&:hover': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      color: '#fff !important',
+                      '& .MuiTableSortLabel-icon': {
+                        color: '#FF6B6B !important',
+                        fontSize: '1.5rem',
+                        opacity: '1 !important',
+                      },
+                      '&.Mui-active': {
+                        color: '#fff !important',
                       },
                     }}
                   >
-                    <MoreVertIcon />
-                  </IconButton>
+                    Order #Id
+                  </TableSortLabel>
                 </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff', width: '20%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
+                  <TableSortLabel
+                    active={sortField === 'customer'}
+                    direction={sortField === 'customer' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('customer')}
+                    sx={{
+                      color: '#fff !important',
+                      '& .MuiTableSortLabel-icon': {
+                        color: '#4ECDC4 !important',
+                        fontSize: '1.5rem',
+                        opacity: '1 !important',
+                      },
+                      '&.Mui-active': {
+                        color: '#fff !important',
+                      },
+                    }}
+                  >
+                    Customer Name
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff', width: '20%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
+                  <TableSortLabel
+                    active={sortField === 'transactionDate'}
+                    direction={sortField === 'transactionDate' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('transactionDate')}
+                    sx={{
+                      color: '#fff !important',
+                      '& .MuiTableSortLabel-icon': {
+                        color: '#FFD93D !important',
+                        fontSize: '1.5rem',
+                        opacity: '1 !important',
+                      },
+                      '&.Mui-active': {
+                        color: '#fff !important',
+                      },
+                    }}
+                  >
+                    Transaction Date
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff', width: '15%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
+                  <TableSortLabel
+                    active={sortField === 'totalAmount'}
+                    direction={sortField === 'totalAmount' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('totalAmount')}
+                    sx={{
+                      color: '#fff !important',
+                      '& .MuiTableSortLabel-icon': {
+                        color: '#6C9BCF !important',
+                        fontSize: '1.5rem',
+                        opacity: '1 !important',
+                      },
+                      '&.Mui-active': {
+                        color: '#fff !important',
+                      },
+                    }}
+                  >
+                    Amount
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff', width: '20%', padding: '16px', '&:first-of-type': { borderTopLeftRadius: '12px' } }}>
+                  <TableSortLabel
+                    active={sortField === 'status'}
+                    direction={sortField === 'status' ? sortOrder : 'asc'}
+                    onClick={() => handleSort('status')}
+                    sx={{
+                      color: '#fff !important',
+                      '& .MuiTableSortLabel-icon': {
+                        color: '#BA94D1 !important',
+                        fontSize: '1.5rem',
+                        opacity: '1 !important',
+                      },
+                      '&.Mui-active': {
+                        color: '#fff !important',
+                      },
+                    }}
+                  >
+                    Order-Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#fff', width: '10%', padding: '16px', paddingLeft: '0px', textAlign: 'left', '&:last-of-type': { borderTopRightRadius: '12px' } }}>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {paginatedOrders.map((order) => (
+                <TableRow 
+                  key={order.orderNumber} 
+                  className={styles.tableRow}
+                  onClick={() => router.push(`/orders/${encodeURIComponent(order.orderNumber)}`)}
+                  sx={{
+                    transition: 'all 0.2s ease',
+                    my: 1,
+                    cursor: 'pointer',
+                    '& td': {
+                      color: '#fff',
+                      borderBottom: 'none',
+                    },
+                    '& td:first-of-type': {
+                      borderTopLeftRadius: '8px',
+                      borderBottomLeftRadius: '8px',
+                    },
+                    '& td:last-of-type': {
+                      borderTopRightRadius: '8px',
+                      borderBottomRightRadius: '8px',
+                    },
+                    '&:hover': {
+                      backgroundColor: order.status === 'Pending' ? 'rgba(255, 152, 0, 0.45) !important' :
+                                     order.status === 'Approved' ? 'rgba(76, 175, 80, 0.45) !important' :
+                                     order.status === 'Shipped' ? 'rgba(33, 150, 243, 0.65) !important' :
+                                     order.status === 'Cancelled' ? 'rgba(244, 67, 54, 0.45) !important' :
+                                     'rgba(255, 255, 255, 0.2) !important',
+                      '& td': {
+                        color: '#fff'
+                      }
+                    }
+                  }}
+                >
+                  <TableCell sx={{ padding: '16px' }}>{order.orderNumber}</TableCell>
+                  <TableCell sx={{ padding: '16px' }}>{order.customer}</TableCell>
+                  <TableCell sx={{ padding: '16px' }}>{formatDate(order.transactionDate)}</TableCell>
+                  <TableCell sx={{ padding: '16px' }}>{formatCurrency(order.totalAmount)}</TableCell>
+                  <TableCell sx={{ padding: '16px' }}>
+                    <FormControl size="small" onClick={(e) => e.stopPropagation()}>
+                      <Select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.orderNumber, e.target.value)}
+                        disabled={updatingStatus === order.orderNumber}
+                        sx={{
+                          minWidth: 120,
+                          color: statusOptions.find(opt => opt.value === order.status)?.color || 'inherit',
+                          '& .MuiSelect-select': {
+                            padding: '6px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }
+                        }}
+                      >
+                        {statusOptions.map((option) => (
+                          <MenuItem
+                            key={option.value}
+                            value={option.value}
+                            sx={{
+                              color: option.color,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              '&.Mui-selected': {
+                                backgroundColor: `${option.color}15`,
+                                color: option.color
+                              },
+                              '&:hover': {
+                                backgroundColor: `${option.color}10`
+                              }
+                            }}
+                          >
+                            {updatingStatus === order.orderNumber && option.value === order.status ? (
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CircularProgress size={16} sx={{ color: option.color }} />
+                                {option.label}
+                              </Box>
+                            ) : (
+                              <>
+                                {React.cloneElement(option.icon, { sx: { color: option.color } })}
+                                {option.label}
+                              </>
+                            )}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </TableCell>
+                  <TableCell sx={{ padding: '16px', paddingLeft: '0px', textAlign: 'left' }}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMenuOpen(e, order.orderNumber);
+                      }}
+                      size="small"
+                      sx={{
+                        color: '#666',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        },
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Pagination */}
       <TablePagination
@@ -896,7 +1053,7 @@ export default function OrderListPage() {
               '&.Mui-disabled': {
                 color: 'rgba(255, 255, 255, 0.3)',
               },
-              '&:hover': {
+          '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 '& .MuiSvgIcon-root': {
                   filter: 'brightness(1.5)',

@@ -31,30 +31,42 @@ function parseLines(rawLines?: unknown[]): OrderLine[] {
 
 const transformToOrder = (raw: RawOrder): Order => {
   const lines = parseLines(raw.lines);
-  const amount = lines.reduce((sum, line) => sum + line.quantity * line.price, 0);
+  const amount = lines.reduce((sum, line) => sum + (line.amount || 0), 0);
 
   return {
     id: raw.id ?? crypto.randomUUID(),
     orderNumber: raw.orderNumber.toString(),
-    customer: raw.customer,
+    customer: raw.customer || '',
     transactionDate: raw.transactionDate ?? new Date().toISOString(),
     status: parseStatus(raw.status),
-    fromLocation: raw.fromLocation ?? "",
-    toLocation: raw.toLocation ?? "",
-    pendingApprovalReasonCode: [],
-    supportRep: "",
-    incoterm: raw.incoterm ?? "",
-    freightTerms: raw.freightTerm ?? "",
-    totalShipUnitCount: 0,
-    totalQuantity: 0,
-    discountRate: 0,
-    billingAddress: "",
-    shippingAddress: "",
-    earlyPickupDate: new Date().toISOString(),
-    latePickupDate: new Date().toISOString(),
+    fromLocation: raw.fromLocation || '',
+    toLocation: raw.toLocation || '',
+    pendingApprovalReasonCode: raw.pendingApprovalReasonCode || [],
+    supportRep: raw.supportRep || '',
+    incoterm: raw.incoterm || '',
+    freightTerms: raw.freightTerms || '',
+    totalShipUnitCount: raw.totalShipUnitCount || 0,
+    totalQuantity: raw.totalQuantity || 0,
+    discountRate: raw.discountRate || 0,
+    billingAddress: raw.billingAddress || {
+      street: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: ''
+    },
+    shippingAddress: raw.shippingAddress || {
+      street: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: ''
+    },
+    earlyPickupDate: raw.earlyPickupDate || new Date().toISOString(),
+    latePickupDate: raw.latePickupDate || new Date().toISOString(),
     lines,
     amount,
-    history: [],
+    history: raw.history || []
   };
 };
 

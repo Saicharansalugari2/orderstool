@@ -1,14 +1,6 @@
 /* src/components/dashboard/OrdersByCustomerChart.tsx */
 
 import React, { useMemo } from 'react';
-import { Bar } from 'react-chartjs-2';
-import { useAppSelector } from '@/store/hooks';
-import { Box, useTheme } from '@mui/material';
-import type {
-  ChartData,
-  ChartOptions,
-  ScriptableContext,
-} from 'chart.js';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,12 +9,21 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartOptions,
+  ChartData,
 } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { useAppSelector } from '@/store/hooks';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+type ChartDataType = ChartData<'bar'>;
+type ChartOptionsType = ChartOptions<'bar'>;
+
 const OrdersByCustomerChart: React.FC = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const orders = useAppSelector((s) => s.orders.orders);
 
   const { amountsByCustomer, maxAmount } = useMemo(() => {
@@ -45,13 +46,13 @@ const OrdersByCustomerChart: React.FC = () => {
     return g;
   };
 
-  const data: ChartData<'bar'> = {
+  const chartData: ChartDataType = {
     labels,
     datasets: [
       {
         label: 'Order Amount ($)',
         data: labels.map((l) => amountsByCustomer[l]),
-        backgroundColor(context: ScriptableContext<'bar'>) {
+        backgroundColor(context: any) {
           const { chartArea, ctx: canvasCtx } = context.chart;
           return chartArea ? getGradient(canvasCtx) : 'rgba(82,168,236,0.6)';
         },
@@ -65,36 +66,68 @@ const OrdersByCustomerChart: React.FC = () => {
     ],
   };
 
-  const options: ChartOptions<'bar'> = {
+  const chartOptions: ChartOptionsType = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    layout: { padding: { left: 20, right: 20, bottom: 25 } },
-    animation: { duration: 1200, easing: 'easeInOutQuart' },
+    interaction: { mode: 'index' as const, intersect: false },
+    layout: { 
+      padding: { 
+        left: isMobile ? 10 : 20, 
+        right: isMobile ? 10 : 20, 
+        bottom: isMobile ? 15 : 25,
+        top: isMobile ? 10 : 20
+      } 
+    },
+    animation: {
+      duration: 1200,
+      easing: 'easeInOutQuart' as const,
+    },
     plugins: {
       legend: {
-        position: 'top',
-        labels: { color: '#fff', font: { size: 12, weight: 'bold' } },
+        position: 'top' as const,
+        labels: { 
+          color: '#fff', 
+          font: { 
+            size: isMobile ? 10 : 12, 
+            weight: 'bold' 
+          },
+          boxWidth: isMobile ? 12 : 16,
+          padding: isMobile ? 10 : 15
+        },
       },
       title: {
         display: true,
         text: 'Total Order Amount by Customer',
         color: '#fff',
-        font: { size: 20, weight: 'bold', family: theme.typography.fontFamily },
-        padding: { bottom: 30 },
+        font: { 
+          size: isMobile ? 16 : 20, 
+          weight: 'bold', 
+          family: theme.typography.fontFamily 
+        },
+        padding: { bottom: isMobile ? 20 : 30 },
       },
       tooltip: {
         backgroundColor: 'rgba(0,0,0,0.8)',
         titleColor: '#52a8ec',
         bodyColor: '#fff',
+        titleFont: { size: isMobile ? 10 : 12 },
+        bodyFont: { size: isMobile ? 10 : 12 },
+        padding: isMobile ? 8 : 10,
         callbacks: {
-          label: (ctx) => `$ ${ctx.parsed.y.toLocaleString()}`,
+          label: (ctx: any) => `$ ${ctx.parsed.y.toLocaleString()}`,
         },
       },
     },
     scales: {
       x: {
-        ticks: { color: '#fff', font: { size: 9 } },
+        ticks: { 
+          color: '#fff', 
+          font: { size: isMobile ? 8 : 9 },
+          maxRotation: isMobile ? 45 : 0,
+          minRotation: isMobile ? 45 : 0,
+          autoSkip: true,
+          autoSkipPadding: isMobile ? 15 : 20,
+        },
         grid: { display: false },
         border: { display: false },
       },
@@ -103,8 +136,9 @@ const OrdersByCustomerChart: React.FC = () => {
         suggestedMax: maxAmount ? maxAmount * 1.1 : 10,
         ticks: {
           color: 'rgba(255,255,255,0.7)',
-          font: { size: 11 },
-          callback: (v) => '$ ' + Number(v).toLocaleString(),
+          font: { size: isMobile ? 9 : 11 },
+          callback: (v: any) => '$ ' + Number(v).toLocaleString(),
+          maxTicksLimit: isMobile ? 6 : 8,
         },
         grid: { display: false },
         border: { display: false },
@@ -115,11 +149,11 @@ const OrdersByCustomerChart: React.FC = () => {
   return (
     <Box
       sx={{
-        height: 450,
+        height: { xs: 350, sm: 400, md: 450 },
         width: '100%',
-        p: 3,
+        p: { xs: 2, sm: 2.5, md: 3 },
         bgcolor: 'rgba(0,0,0,0.7)',
-        borderRadius: 3,
+        borderRadius: { xs: 2, sm: 2.5, md: 3 },
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(255,255,255,0.1)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
@@ -135,7 +169,8 @@ const OrdersByCustomerChart: React.FC = () => {
         },
       }}
     >
-      <Bar data={data} options={options} />
+      {/* @ts-ignore */}
+      <Bar data={chartData} options={chartOptions} />
     </Box>
   );
 };

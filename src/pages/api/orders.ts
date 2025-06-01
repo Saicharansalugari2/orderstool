@@ -41,11 +41,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ...order,
             orderNumber: normalizeOrderNumber(order.orderNumber),
           };
-          
+    
           const existingOrder = orderMap.get(normalizedOrder.orderNumber);
           if (!existingOrder || new Date(normalizedOrder.transactionDate) > new Date(existingOrder.transactionDate)) {
             orderMap.set(normalizedOrder.orderNumber, normalizedOrder);
-          }
+    }
         });
         
         const uniqueOrders = Array.from(orderMap.values());

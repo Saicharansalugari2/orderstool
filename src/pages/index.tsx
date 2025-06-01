@@ -52,8 +52,20 @@ const transformToOrder = (raw: RawOrder): Order => {
     totalShipUnitCount: 0,
     totalQuantity: 0,
     discountRate: 0,
-    billingAddress: "",
-    shippingAddress: "",
+    billingAddress: {
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      postalCode: ""
+    },
+    shippingAddress: {
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      postalCode: ""
+    },
     earlyPickupDate: new Date().toISOString(),
     latePickupDate: new Date().toISOString(),
     lines,
@@ -92,7 +104,7 @@ const Home: React.FC = () => {
     <Container 
       maxWidth={false} 
       sx={{ 
-        mt: { xs: 2, sm: 3 }, 
+        mt: { xs: 4, sm: 6 }, 
         px: { xs: 1, sm: 2, md: 3 },
         maxWidth: { sm: '100%', md: '90%', lg: '1400px' },
         mx: 'auto'

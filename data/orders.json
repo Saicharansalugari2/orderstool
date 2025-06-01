@@ -629,60 +629,11 @@
     ]
   },
   {
-    "orderNumber": "ORD-0001",
-    "customer": "Acme Corporation",
-    "orderCreatedDate": "2025-05-01T04:00:00.000Z",
-    "dueDate": "2025-05-08T04:00:00.000Z",
-    "status": "Shipped",
-    "fromLocation": "Warehouse A",
-    "toLocation": "Retail Store B",
-    "pendingApprovalReasonCodes": [
-      "PRICE_DISCREPANCY"
-    ],
-    "supportRep": "John Doe",
-    "incoterm": "",
-    "freightTerms": "Prepaid",
-    "totalShipUnitCount": "5",
-    "totalQuantity": "100",
-    "discountRate": "5",
-    "billingAddress": "123 Elm St,Springfield",
-    "shippingAddress": "456 Oak Ave,Springfield",
-    "earlyPickupDate": "2025-05-03T04:00:00.000Z",
-    "latePickupDate": "2025-05-05T04:00:00.000Z",
-    "lines": [
-      {
-        "id": 1,
-        "item": "Gloves",
-        "units": "Box",
-        "quantity": 2,
-        "price": 25,
-        "amount": 50
-      },
-      {
-        "id": 2,
-        "item": "Masks",
-        "units": "Piece",
-        "quantity": 1,
-        "price": 40,
-        "amount": 40
-      },
-      {
-        "id": 3,
-        "item": "Cutlery",
-        "units": "Pack",
-        "quantity": 1,
-        "price": 10,
-        "amount": 10
-      }
-    ],
-    "totalAmount": 100
-  },
-  {
     "orderNumber": "ORD-0002",
     "customer": "Globex LLC",
     "orderCreatedDate": "2025-05-02T04:00:00.000Z",
     "dueDate": "2025-06-02T04:00:00.000Z",
-    "status": "Shipped",
+    "status": "Approved",
     "fromLocation": "Warehouse B",
     "toLocation": "Distributor C",
     "pendingApprovalReasonCodes": [
@@ -921,5 +872,46 @@
       }
     ],
     "totalAmount": 100
+  },
+  {
+    "orderNumber": "ORD-0001",
+    "customer": "Acme Corporation",
+    "transactionDate": "2025-05-01T04:00:00.000Z",
+    "status": "Pending",
+    "fromLocation": "Warehouse A",
+    "toLocation": "Retail Store B",
+    "pendingApprovalReasonCodes": [
+      "PRICE_DISCREPANCY",
+      "CREDIT_HOLD"
+    ],
+    "supportRep": "John Doe",
+    "incoterm": "",
+    "freightTerms": "Prepaid",
+    "totalShipUnitCount": "5",
+    "totalQuantity": "100",
+    "discountRate": "0.05",
+    "billingAddress": "123 Elm St,Springfield,IL,62701,USA",
+    "shippingAddress": "456 Oak Ave,Springfield,IL,62702,USA",
+    "earlyPickupDate": "2025-05-03T04:00:00.000Z",
+    "latePickupDate": "2025-05-05T04:00:00.000Z",
+    "lines": [
+      {
+        "id": 1,
+        "item": "Gloves",
+        "units": "Box",
+        "quantity": 2,
+        "price": 25,
+        "amount": 50
+      },
+      {
+        "id": 2,
+        "item": "Cutlery",
+        "units": "Piece",
+        "quantity": 1,
+        "price": 40,
+        "amount": 40
+      }
+    ],
+    "totalAmount": 90
   }
 ]

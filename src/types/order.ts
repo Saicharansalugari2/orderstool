@@ -8,7 +8,7 @@ export interface Address {
   country: string;
 }
 
-export type OrderStatus = "" | "Pending" | "Approved" | "Shipped" | "Cancelled";
+export type OrderStatus = '' | 'Pending' | 'Approved' | 'Shipped' | 'Cancelled';
 
 export interface OrderLine {
   id: string;
@@ -20,12 +20,12 @@ export interface OrderLine {
 }
 
 export interface OrderHistory {
-  timestamp: string; // ISO date string
+  timestamp: string;
   event: string;
 }
 
 export interface Order {
-  id?: string;
+  id: string;
   orderNumber: string;
   customer: string;
   transactionDate: string;
@@ -39,11 +39,11 @@ export interface Order {
   totalShipUnitCount: number;
   totalQuantity: number;
   discountRate: number;
-  billingAddress: string;
-  shippingAddress: string;
+  billingAddress: Address;
+  shippingAddress: Address;
   earlyPickupDate: string;
   latePickupDate: string;
-  amount: number;
   lines: OrderLine[];
+  amount: number;
   history: OrderHistory[];
 }

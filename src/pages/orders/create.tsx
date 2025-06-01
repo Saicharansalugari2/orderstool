@@ -384,11 +384,11 @@ export default function CreateOrderPage() {
       <Box 
         maxWidth={1000} 
         mx="auto" 
-        p={3} 
+        p={{ xs: 1, sm: 2, md: 3 }}
         component="form" 
         onSubmit={handleSubmit}
         sx={{ 
-          fontSize: '0.875rem',
+          fontSize: { xs: '0.813rem', sm: '0.875rem' },
           background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
           minHeight: '100vh',
           color: '#fff',
@@ -396,10 +396,10 @@ export default function CreateOrderPage() {
           '&::before': {
             content: '""',
             position: 'absolute',
-            top: 24,
-            left: 24,
-            right: 24,
-            bottom: 24,
+            top: { xs: 12, sm: 24 },
+            left: { xs: 12, sm: 24 },
+            right: { xs: 12, sm: 24 },
+            bottom: { xs: 12, sm: 24 },
             border: '1px solid rgba(255, 255, 255, 0.12)',
             borderRadius: '16px',
             pointerEvents: 'none',
@@ -411,10 +411,10 @@ export default function CreateOrderPage() {
           '&::after': {
             content: '""',
             position: 'absolute',
-            top: 25,
-            left: 25,
-            right: 25,
-            bottom: 25,
+            top: { xs: 13, sm: 25 },
+            left: { xs: 13, sm: 25 },
+            right: { xs: 13, sm: 25 },
+            bottom: { xs: 13, sm: 25 },
             border: '1px solid rgba(255, 255, 255, 0.05)',
             borderRadius: '15px',
             pointerEvents: 'none',
@@ -423,29 +423,30 @@ export default function CreateOrderPage() {
       >
         <Box sx={{ 
           maxWidth: '100%',
-          p: { xs: 2, sm: 3 },
-          pt: { xs: 4, sm: 5 },
+          p: { xs: 1, sm: 2, md: 3 },
+          pt: { xs: 3, sm: 4, md: 5 },
         }}>
-     <Typography
+          <Typography
             variant="h5"
-            mb={4}
-  sx={{
+            mb={{ xs: 2, sm: 3, md: 4 }}
+            sx={{
               fontWeight: 700,
-    textAlign: 'center',
+              textAlign: 'center',
               color: '#52a8ec',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               textShadow: '0 0 20px rgba(82, 168, 236, 0.4)',
-  }}
->
+              fontSize: { xs: '1.25rem', sm: '1.5rem' }
+            }}
+          >
             Create New Order
-</Typography>
+          </Typography>
 
           {/* Basic Information Card */}
           <Card sx={{ 
             ...commonStyles.card, 
-            mb: 3, 
-            p: 3,
+            mb: { xs: 2, sm: 3 }, 
+            p: { xs: 2, sm: 3 },
             border: '1px solid rgba(255, 255, 255, 0.08)',
             '&:hover': {
               border: '1px solid rgba(82, 168, 236, 0.3)',
@@ -460,16 +461,20 @@ export default function CreateOrderPage() {
                 ...commonStyles.sectionTitle,
                 fontWeight: 600,
                 color: '#fff',
-                mb: 3,
-                fontSize: '1rem',
+                mb: { xs: 2, sm: 3 },
+                fontSize: { xs: '0.938rem', sm: '1rem' },
               }}
             >
               Basic Information
             </Typography>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
               {/* Order Number + Customer Row */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                gap: { xs: 1.5, sm: 2 } 
+              }}>
                 <TextField
                   required
                   label="Order Number"
@@ -489,7 +494,11 @@ export default function CreateOrderPage() {
               </Box>
 
               {/* Date + Status Row */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                gap: { xs: 1.5, sm: 2 } 
+              }}>
                 <DatePicker
                   label="Transaction Date *"
                   value={basicInfo.transactionDate}
@@ -530,7 +539,11 @@ export default function CreateOrderPage() {
               </Box>
 
               {/* From + To Location Row */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                gap: { xs: 1.5, sm: 2 } 
+              }}>
                 <FormControl required sx={{ ...commonStyles.select, flex: 1 }}>
                   <InputLabel>From Location</InputLabel>
                   <Select
@@ -550,26 +563,22 @@ export default function CreateOrderPage() {
                   name="toLocation"
                   value={basicInfo.toLocation}
                   onChange={handleBasicChange}
-                  sx={{ ...commonStyles.select, flex: 1, 
-                    '& .MuiInputBase-root': {
-                      ...commonStyles.select['& .MuiOutlinedInput-root']
-                    }
-                  }}
+                  sx={{ ...commonStyles.textField, flex: 1 }}
                 />
               </Box>
 
               {/* Support Rep + Pending Approval Row */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                gap: { xs: 1.5, sm: 2 } 
+              }}>
                 <TextField
                   label="Support Representative"
                   name="supportRep"
                   value={basicInfo.supportRep}
                   onChange={handleBasicChange}
-                  sx={{ ...commonStyles.select, flex: 1, 
-                    '& .MuiInputBase-root': {
-                      ...commonStyles.select['& .MuiOutlinedInput-root']
-                    }
-                  }}
+                  sx={{ ...commonStyles.textField, flex: 1 }}
                 />
                 <FormControl sx={{ ...commonStyles.select, flex: 1 }}>
                   <InputLabel>Pending Approval Reasons</InputLabel>
@@ -585,6 +594,7 @@ export default function CreateOrderPage() {
                         flexWrap: 'wrap', 
                         gap: 0.5,
                         maxWidth: '100%',
+                        minHeight: '20px'
                       }}>
                         {(selected as string[]).map((value) => (
                           <Box
@@ -592,30 +602,19 @@ export default function CreateOrderPage() {
                             sx={{
                               backgroundColor: 'rgba(255, 255, 255, 0.08)',
                               borderRadius: '4px',
-                              padding: '1px 4px',
-                              fontSize: '0.7rem',
+                              padding: '2px 6px',
+                              fontSize: { xs: '0.688rem', sm: '0.75rem' },
                               color: '#fff',
                               whiteSpace: 'nowrap',
                               display: 'flex',
-                              alignItems: 'center',
-                              height: '18px',
+                              alignItems: 'center'
                             }}
                           >
-                            {value.replace(/_/g, ' ')}
+                            {value}
                           </Box>
                         ))}
                       </Box>
                     )}
-                    sx={{
-                      '& .MuiSelect-select': {
-                        display: 'flex',
-                        alignItems: 'center',
-                        py: 1,
-                        minHeight: '32px !important',
-                        maxHeight: '32px',
-                        overflow: 'hidden'
-                      }
-                    }}
                   >
                     {pendingApprovalReasonCodes.map(code => (
                       <MenuItem 
@@ -696,11 +695,8 @@ export default function CreateOrderPage() {
                       onChange={handleSelectChange}
                       label="Incoterm"
                     >
-                      <MenuItem value="" sx={menuItemStyle}>
-                        <em>None</em>
-                      </MenuItem>
                       {incotermOptions.map(option => (
-                        <MenuItem key={option} value={option}>{option}</MenuItem>
+                        <MenuItem key={option} value={option} sx={menuItemStyle}>{option}</MenuItem>
                       ))}
                     </Select>
                   </FormControl>

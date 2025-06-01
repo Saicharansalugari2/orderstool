@@ -16,7 +16,7 @@ import {
   Grid,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import type { Order, OrderLine } from '@/types/order';
+import type { Order, OrderLine, Address } from '@/types/order';
 import styles from '@/styles/components/OrderForm.module.css';
 import { useRouter } from 'next/router';
 import { useAppDispatch } from '@/store/hooks';
@@ -45,6 +45,7 @@ const blankLine = (): OrderLine => ({
 
 const initialOrderState: Omit<Order, 'orderNumber'> = {
   /* required fields ------------------------------------------------------- */
+  id: crypto.randomUUID(),
   customer: '',
   transactionDate: new Date().toISOString().split('T')[0],
   status: 'Pending',
@@ -65,8 +66,20 @@ const initialOrderState: Omit<Order, 'orderNumber'> = {
 
   /* strings ---------------------------------------------------------------- */
   supportRep: '',
-  billingAddress: '',
-  shippingAddress: '',
+  billingAddress: {
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: ''
+  },
+  shippingAddress: {
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: ''
+  },
 
   /* arrays ---------------------------------------------------------------- */
   pendingApprovalReasonCode: [],
@@ -119,6 +132,22 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Handle nested address fields
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      if (parent === 'billingAddress' || parent === 'shippingAddress') {
+        setFormData((prev) => ({
+          ...prev,
+          [parent]: {
+            ...(prev[parent] as Address),
+            [child]: value
+          }
+        }));
+        return;
+      }
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -258,6 +287,100 @@ const created = await dispatch(createOrderAsync(newOrder)).unwrap();
                 ))}
               </Select>
             </FormControl>
+          </Grid>
+
+          {/* Billing Address */}
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="subtitle1">Billing Address</Typography>
+              <TextField
+                fullWidth
+                label="Street"
+                name="billingAddress.street"
+                value={formData.billingAddress.street}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="City"
+                name="billingAddress.city"
+                value={formData.billingAddress.city}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="State"
+                name="billingAddress.state"
+                value={formData.billingAddress.state}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="Postal Code"
+                name="billingAddress.postalCode"
+                value={formData.billingAddress.postalCode}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="Country"
+                name="billingAddress.country"
+                value={formData.billingAddress.country}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+            </Box>
+          </Grid>
+
+          {/* Shipping Address */}
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="subtitle1">Shipping Address</Typography>
+              <TextField
+                fullWidth
+                label="Street"
+                name="shippingAddress.street"
+                value={formData.shippingAddress.street}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="City"
+                name="shippingAddress.city"
+                value={formData.shippingAddress.city}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="State"
+                name="shippingAddress.state"
+                value={formData.shippingAddress.state}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="Postal Code"
+                name="shippingAddress.postalCode"
+                value={formData.shippingAddress.postalCode}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+              <TextField
+                fullWidth
+                label="Country"
+                name="shippingAddress.country"
+                value={formData.shippingAddress.country}
+                onChange={handleInput}
+                disabled={!isEditing}
+              />
+            </Box>
           </Grid>
         </Grid>
 
