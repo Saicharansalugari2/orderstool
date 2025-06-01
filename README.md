@@ -117,11 +117,11 @@ cd orderstool
 
 Important: If you encounter any peer‐dependency or version conflicts (especially with MUI), see the “Troubleshooting” section below.
 
-3.1. Using npm
+ Using npm
 
 bash
 
-npm install
+## npm install
 
 This reads package.json and installs all required packages:
 
@@ -129,7 +129,7 @@ React, Next.js, Redux Toolkit, MUI, Chart.js, etc.
 
 It also generates (or updates) package-lock.json.
 
-5. Run in Development Mode
+## Run in Development Mode
 
 Start the Next.js dev server:
 
