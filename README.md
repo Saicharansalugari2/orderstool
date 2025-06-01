@@ -118,8 +118,7 @@ Important: If you encounter any peer‐dependency or version conflicts (especial
 
 3.1. Using npm
 bash
-Copy
-Edit
+
 npm install
 
 This reads package.json and installs all required packages:
@@ -133,9 +132,9 @@ It also generates (or updates) package-lock.json.
 Start the Next.js dev server:
 
 bash
-Copy
-Edit
+
 npm run dev
+
 (or yarn dev)
 
 Next.js compiles in watch mode.
