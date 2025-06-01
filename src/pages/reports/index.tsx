@@ -1,128 +1,239 @@
 
-import React, { useMemo } from 'react';
-import { Box, Typography, Paper, Grid, Divider } from '@mui/material';
+
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Divider
+} from '@mui/material';
+import Chart from 'chart.js/auto';
+import type {
+  ChartType,
   ChartData,
   ChartOptions,
-  TooltipItem
+  ChartDataset,
+  ScriptableContext
 } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-const statusColor: Record<string, string> = {
-  Pending:   '#FF9800',
-  Approved:  '#4CAF50',
-  Shipped:   '#2196F3',
-  Cancelled: '#F44336',
-};
-
-const statusBg = (hex: string) => hex.replace(')', ', 0.1)').replace('#', 'rgba(');
-
-const statusIcon: Record<string, React.ReactNode> = {
-  Pending: <PendingIcon sx={{ fontSize: 32, color: statusColor.Pending }} />,
-  Approved: <CheckCircleIcon sx={{ fontSize: 32, color: statusColor.Approved }} />,
-  Shipped: <LocalShippingIcon sx={{ fontSize: 32, color: statusColor.Shipped }} />,
-  Cancelled: <CancelIcon sx={{ fontSize: 32, color: statusColor.Cancelled }} />,
-};
-
 
 const ReportsPage: React.FC = () => {
-  const orders = useSelector((s: RootState) => s.orders.orders);
+  const orders = useSelector((state: RootState) => state.orders.orders);
+  const chartRef = useRef<HTMLCanvasElement | null>(null);
+  const chartInstance = useRef<Chart | null>(null);
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return '#FF9800';
+      case 'Approved':
+        return '#4CAF50';
+      case 'Shipped':
+        return '#2196F3';
+      case 'Cancelled':
+        return '#F44336';
+      default:
+        return '#5B21B6';
+    }
+  };
 
-  const { metrics, totalAmount } = useMemo(() => {
-    const m: Record<
-      string,
-      { count: number; amount: number }
-    > = {};
+  const calculateTotalAmount = () => {
+    return orders.reduce((total, order) => {
+      const orderTotal = order.lines.reduce((sum, line) => sum + line.amount, 0);
+      return total + orderTotal;
+    }, 0);
+  };
 
-    let runningTotal = 0;
+  const calculateStatusMetrics = () => {
+    return orders.reduce<
+      Record<string, { count: number; amount: number }>
+    >((acc, order) => {
+      const status = order.status;
+      const orderTotal = order.lines.reduce((sum, line) => sum + line.amount, 0);
 
-    orders.forEach((o) => {
-      const amt = o.lines.reduce((s, l) => s + l.amount, 0);
-      runningTotal += amt;
+      if (!acc[status]) {
+        acc[status] = { count: 0, amount: 0 };
+      }
+      acc[status].count += 1;
+      acc[status].amount += orderTotal;
+      return acc;
+    }, {});
+  };
 
-      const key = o.status || 'Unknown';
-      if (!m[key]) m[key] = { count: 0, amount: 0 };
-      m[key].count += 1;
-      m[key].amount += amt;
-    });
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const metrics = calculateStatusMetrics();
 
-    return { metrics: m, totalAmount: runningTotal };
-  }, [orders]);
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+    const ctx = chartRef.current.getContext('2d');
+    if (!ctx) return;
 
-  
+    const labels = Object.keys(metrics);
+    const counts = labels.map((status) => metrics[status].count);
+    const backgroundColors = labels.map((status) => getStatusColor(status));
 
-  const labels = Object.keys(metrics);
-  const counts = labels.map((l) => metrics[l].count);
-    
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        data: counts,
-        backgroundColor: labels.map((l) => statusColor[l] ?? '#5B21B6'),
-        borderWidth: 3,
-        borderColor: '#1a1a1a',
-        hoverOffset: 20,
-        hoverBorderWidth: 4,
-        hoverBorderColor: '#ffffff',
+    const chartConfig: {
+      type: ChartType;
+      data: ChartData<'pie', number[], string>;
+      options: ChartOptions<'pie'>;
+    } = {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [
+          {
+            data: counts,
+            backgroundColor: backgroundColors,
+            borderColor: '#1a1a1a',
+            borderWidth: 3,
+            hoverOffset: 20,
+            hoverBorderWidth: 4,
+            hoverBorderColor: '#ffffff',
+          },
+        ],
       },
-    ],
-  } as const;
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#FFFFFF', 
+              boxWidth: 20,
+              boxHeight: 20,
+              padding: 25,
+              font: {
+                size: 16,
+                weight: 'bold',
+                family: "'Space Grotesk', sans-serif",
+              },
+              generateLabels: (chart) => {
+                const data = chart.data;
+                if (!data.datasets || data.datasets.length === 0) return [];
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-        labels: {
-          color: '#fff',
-          font: { size: 14, weight: 'bold' as const, family: 'Space Grotesk, sans-serif' },
-          padding: 24,
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        callbacks: {
-          label: (context: TooltipItem<'pie'>) => {
-            const total = context.dataset.data.reduce((a, v) => a + (v || 0), 0);
-            const value = context.raw as number;
-            const percentage = ((value / total) * 100).toFixed(1);
-            return `${context.label}: ${value} (${percentage}%)`;
+                const dataset = data.datasets[0];
+                const labels = data.labels as string[];
+                const meta = chart.getDatasetMeta(0);
+                const total = (dataset.data as number[]).reduce(
+                  (sum, val) => sum + (val || 0),
+                  0
+                );
+
+                return labels.map((label, i) => {
+                  const value = (dataset.data as number[])[i] || 0;
+                  const percentage = total
+                    ? ((value / total) * 100).toFixed(1)
+                    : '0.0';
+                  const element = meta.data[i] as unknown as { hidden?: boolean };
+
+                  return {
+                    text: `${label} (${value} - ${percentage}%)`,
+                    fillStyle: Array.isArray(dataset.backgroundColor)
+                      ? dataset.backgroundColor[i]
+                      : (dataset.backgroundColor as string),
+                    strokeStyle: '#FFFFFF',
+                    lineWidth: 1,
+                    hidden: element?.hidden ?? false,
+                    index: i,
+                    fontColor: '#FFFFFF', 
+                  };
+                });
+              },
+              filter: (item) => !item.hidden,
+            },
+            onClick: null,
+            onHover: null,
+          },
+          title: {
+            display: true,
+            text: 'Orders by Status',
+            color: '#FFFFFF',
+            font: {
+              size: 20,
+              weight: 'bold',
+              family: "'Space Grotesk', sans-serif",
+            },
+            padding: { bottom: 20 },
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            titleColor: '#FFFFFF',
+            bodyColor: '#FFFFFF',
+            titleFont: {
+              size: 16,
+              weight: 'bold',
+              family: "'Space Grotesk', sans-serif",
+            },
+            bodyFont: {
+              size: 14,
+              weight: 'bold',
+              family: "'Space Grotesk', sans-serif",
+            },
+            padding: 16,
+            cornerRadius: 8,
+            displayColors: true,
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderWidth: 1,
+            callbacks: {
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.raw as number;
+                const dataset = context.dataset;
+                const total = (dataset.data as number[]).reduce(
+                  (sum, val) => sum + (val || 0),
+                  0
+                );
+                const percentage = total
+                  ? ((value / total) * 100).toFixed(1)
+                  : '0.0';
+                return `${label}: ${value} (${percentage}%)`;
+              },
+            },
           },
         },
+        animation: {
+          duration: 2000,
+          easing: 'easeInOutQuart',
+        },
       },
-    },
-  } as const;
+    };
 
+    chartInstance.current = new Chart(ctx, chartConfig as any);
+    chartInstance.current.update();
+
+    return () => {
+      chartInstance.current?.destroy();
+    };
+  }, [orders]);
+
+  const metrics = calculateStatusMetrics();
+  const totalAmount = calculateTotalAmount();
 
   return (
     <Box
       sx={{
         p: 4,
         minHeight: '100vh',
-        bgcolor: 'linear-gradient(135deg,#000 0%,#1a1a1a 100%)',
-        color: '#fff',
+        background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+        color: '#FFFFFF',
       }}
     >
-      <Typography 
-        variant="h4" 
-        sx={{ fontWeight: 800, textAlign: 'center', mb: 4 }}
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 800,
+          color: '#FFFFFF',
+          textShadow: '0 0 20px rgba(255, 255, 255, 0.4)',
+          mb: 4,
+          textAlign: 'center',
+        }}
       >
         Orders Analytics Dashboard
       </Typography>
@@ -130,94 +241,187 @@ const ReportsPage: React.FC = () => {
       <Paper
         sx={{
           p: 4,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 2,
           maxWidth: 1200,
           mx: 'auto',
-          bgcolor: 'rgba(0,0,0,0.8)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 2,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background:
+              'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background:
+              'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+          },
         }}
       >
- 
-        <Box sx={{ position: 'relative', height: 400, mb: 4 }}>
-          <Pie data={chartData} options={chartOptions} />
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            height: '400px',
+            mb: 4,
+          }}
+        >
+          <canvas ref={chartRef} />
         </Box>
 
-        <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.2)' }} />
+        <Divider
+          sx={{
+            my: 4,
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            '&::before, &::after': {
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            },
+          }}
+        />
 
-       
+        <Box sx={{ mt: 4 }}>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              color: '#FFFFFF',
+              fontWeight: 800,
+              mb: 3,
+              textAlign: 'center',
+            }}
+          >
+            Detailed Statistics
+          </Typography>
+
           <Grid container spacing={3}>
             <Grid item xs={12}>
-            <Paper
-              sx={{
-                p: 3,
-                bgcolor: 'rgba(0,0,0,0.6)',
-                borderRadius: 2,
-                border: '1px solid rgba(255,255,255,0.1)',
-                textAlign: 'center'
-              }}
-            >
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
-                Total Orders Value : ${totalAmount.toFixed(2)}
+              <Paper
+                sx={{
+                  p: 3,
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  borderRadius: 2,
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{ color: '#FFFFFF', mb: 2, fontWeight: 800 }}
+                >
+                  Total Orders Value: ${totalAmount.toFixed(2)}
                 </Typography>
-              <Typography sx={{ fontWeight: 600 }}>
-                Total Number of Orders : {orders.length}
+                <Typography
+                  variant="body1"
+                  sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}
+                >
+                  Total Number of Orders: {orders.length}
                 </Typography>
               </Paper>
             </Grid>
 
-          {labels.map((status) => (
+            {Object.entries(metrics).map(([status, data]) => (
               <Grid item xs={12} sm={6} md={3} key={status}>
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: 2,
-                  border: `2px solid ${statusColor[status]}`,
-                  bgcolor: 'rgba(0,0,0,0.8)',
-                  boxShadow: `0 2px 15px ${statusColor[status]}80`,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  {statusIcon[status]}
+                <Paper
+                  sx={{
+                    p: 3,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    background:
+                      'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%)',
+                    borderRadius: 2,
+                    border: `2px solid ${getStatusColor(status)}40`,
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: `0 4px 20px ${getStatusColor(status)}40`,
+                      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                      border: `2px solid ${getStatusColor(status)}60`,
+                      background:
+                        'linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.75) 100%)',
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      background: `linear-gradient(90deg, transparent, ${getStatusColor(
+                        status
+                      )}50, transparent)`,
+                    },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      background: `linear-gradient(90deg, transparent, ${getStatusColor(
+                        status
+                      )}50, transparent)`,
+                    },
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
                   <Typography
                     variant="h6"
-                    sx={{ 
-                      color: statusColor[status],
-                    fontWeight: 800,
-                      textShadow: `0 0 12px ${statusColor[status]}cc`
+                    sx={{
+                      color: getStatusColor(status),
+                      fontWeight: 800,
+                      mb: 2,
+                      textShadow: `0 0 10px ${getStatusColor(status)}50`,
+                      letterSpacing: '0.5px',
+                      fontSize: '1.25rem',
                     }}
                   >
                     {status}
                   </Typography>
-                </Box>
-                <Typography 
-                  sx={{ 
-                    color: statusColor[status],
-                    fontWeight: 700,
-                    textShadow: `0 0 12px ${statusColor[status]}cc`
-                  }}
-                >
-                  Count : {metrics[status].count}
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: getStatusColor(status),
+                      mb: 1,
+                      fontWeight: 700,
+                      opacity: 0.95,
+                      fontSize: '1.1rem',
+                      textShadow: `0 0 8px ${getStatusColor(status)}40`,
+                    }}
+                  >
+                    Count: {data.count}
                   </Typography>
-                <Typography 
-                  sx={{ 
-                    color: statusColor[status],
-                    fontWeight: 700,
-                    textShadow: `0 0 12px ${statusColor[status]}cc`
-                  }}
-                >
-                  Total : ${metrics[status].amount.toFixed(2)}
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: getStatusColor(status),
+                      fontWeight: 700,
+                      opacity: 0.95,
+                      fontSize: '1.1rem',
+                      textShadow: `0 0 8px ${getStatusColor(status)}40`,
+                    }}
+                  >
+                    Total: ${data.amount.toFixed(2)}
                   </Typography>
                 </Paper>
               </Grid>
             ))}
           </Grid>
+        </Box>
       </Paper>
     </Box>
   );
 };
 
-export default ReportsPage; 
+export default ReportsPage;
