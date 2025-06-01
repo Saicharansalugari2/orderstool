@@ -1,3 +1,4 @@
+// src/components/OrderForm.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -9,131 +10,161 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
-  Card,
-  IconButton,
   Paper,
-  useTheme,
   CircularProgress,
   Alert,
-  Grid
+  Grid,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import type { Order } from '../types/order';
+import type { Order, OrderLine } from '@/types/order';
 import styles from '@/styles/components/OrderForm.module.css';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { createOrderAsync, fetchOrderByIdAsync, updateOrderAsync } from '@/store/ordersThunks';
+import { useAppDispatch } from '@/store/hooks';
+import {
+  createOrderAsync,
+  fetchOrderByIdAsync,
+  updateOrderAsync,
+} from '@/store/ordersThunks';
+
+/* -------------------------------------------------------------------------- */
+/*  ──  helpers / constants  ──────────────────────────────────────────────── */
 
 interface OrderFormProps {
   mode: 'create' | 'view';
   orderNumber?: string;
 }
 
-const statusOptions = [
-  { value: 'Pending', color: '#FF9800' },
-  { value: 'Approved', color: '#4CAF50' },
-  { value: 'Shipped', color: '#2196F3' },
-  { value: 'Cancelled', color: '#F44336' }
-];
-
-const locationOptions = ['Warehouse A', 'Warehouse B', 'Warehouse C', 'Warehouse D'];
-const incotermOptions = ['EXW', 'FOB', 'CIF', 'DDP', 'DAP'];
-const freightTermsOptions = ['Prepaid', 'Collect'];
-const pendingApprovalReasonCodes = [
-  'PRICE_DISCREPANCY',
-  'CREDIT_HOLD',
-  'STOCK_SHORTAGE',
-  'CUSTOMER_REQUEST',
-];
-
-const itemOptions = ['Gloves', 'Masks', 'Cups and Lids', 'Cutlery', 'Pans'];
-const unitsOptions = ['Box', 'Pack', 'Piece', 'Set'];
+const blankLine = (): OrderLine => ({
+  id: crypto.randomUUID(),
+  item: '',
+  units: '',
+  quantity: 0,
+  price: 0,
+  amount: 0,
+});
 
 const initialOrderState: Omit<Order, 'orderNumber'> = {
+  /* required fields ------------------------------------------------------- */
   customer: '',
   transactionDate: new Date().toISOString().split('T')[0],
-  latePickupDate: '',
-  amount: 0,
   status: 'Pending',
+  fromLocation: '',
+  toLocation: '',
+
+  /* optional / numeric ---------------------------------------------------- */
+  latePickupDate: '',
+  earlyPickupDate: '',
+  totalShipUnitCount: 0,
+  totalQuantity: 0,
+  discountRate: 0,
+  amount: 0,
+
+  /* dropdowns / mutually exclusive --------------------------------------- */
+  incoterm: '',
+  freightTerms: '',
+
+  /* strings ---------------------------------------------------------------- */
+  supportRep: '',
+  billingAddress: '',
+  shippingAddress: '',
+
+  /* arrays ---------------------------------------------------------------- */
+  pendingApprovalReasonCode: [],
+  lines: [blankLine()],
+
+  /* audit trail ----------------------------------------------------------- */
+  history: [],
 };
+
+const statusOptions = ['Pending', 'Approved', 'Shipped', 'Cancelled'] as const;
+
+/* -------------------------------------------------------------------------- */
+/*  ──  component  ─────────────────────────────────────────────────────────── */
 
 export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
   const [formData, setFormData] = useState(initialOrderState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(mode === 'create');
 
+  /* ─────────────────────────────────────────────────────────────────────── */
+  /*  load order when in view-mode                                           */
+  /* ─────────────────────────────────────────────────────────────────────── */
+
   useEffect(() => {
-    const fetchOrderData = async () => {
+    (async () => {
       if (mode === 'view' && orderNumber) {
         setLoading(true);
         try {
-          const orderData = await dispatch(fetchOrderByIdAsync(orderNumber)).unwrap();
-          setFormData(orderData);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch order');
+          const order = await dispatch(fetchOrderByIdAsync(orderNumber)).unwrap();
+          // remove orderNumber so it matches the Omit<> shape
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { orderNumber: _omit, ...rest } = order;
+          setFormData(rest);
+        } catch (e) {
+          setError(e instanceof Error ? e.message : 'Failed to fetch order');
         } finally {
           setLoading(false);
         }
       }
-    };
-
-    fetchOrderData();
+    })();
   }, [mode, orderNumber, dispatch]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* ─────────────────────────────────────────────────────────────────────── */
+  /*  handlers                                                               */
+  /* ─────────────────────────────────────────────────────────────────────── */
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleStatusChange = (e: SelectChangeEvent) => {
-    setFormData(prev => ({
-      ...prev,
-      status: e.target.value as Order['status']
-    }));
-  };
+  const handleSelect =
+    (field: keyof typeof formData) => (e: SelectChangeEvent<string>) =>
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
       if (mode === 'create') {
-        const result = await dispatch(createOrderAsync(formData)).unwrap();
-        router.push(`/orders/${result.orderNumber}`);
+        // ――― add an orderNumber so the payload is a complete `Order`
+const newOrder: Order = {
+  orderNumber: crypto.randomUUID(),   // or nanoid()
+  ...formData,
+};
+
+const created = await dispatch(createOrderAsync(newOrder)).unwrap();
+        router.push(`/orders/${created.orderNumber}`);
       } else if (mode === 'view' && orderNumber && isEditing) {
-        await dispatch(updateOrderAsync({ orderNumber, ...formData })).unwrap();
+        await dispatch(
+          updateOrderAsync({ orderNumber, ...formData }),
+        ).unwrap();
         setIsEditing(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process order');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Request failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    if (mode === 'create') {
-      router.push('/orders/list');
-    } else {
+  const cancel = () => {
+    if (mode === 'create') router.push('/orders/list');
+    else {
       setIsEditing(false);
-      // Reset form data to original state
-      if (orderNumber) {
-        dispatch(fetchOrderByIdAsync(orderNumber));
-      }
+      orderNumber && dispatch(fetchOrderByIdAsync(orderNumber));
     }
   };
+
+  /* ─────────────────────────────────────────────────────────────────────── */
+  /*  rendering                                                              */
+  /* ─────────────────────────────────────────────────────────────────────── */
 
   if (loading && mode === 'view' && !isEditing) {
     return (
@@ -150,20 +181,21 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
       </Typography>
 
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={onSubmit} className={styles.form}>
         <Grid container spacing={3}>
+          {/* customer, dates, amount --------------------------------------- */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label="Customer Name"
+              label="Customer"
               name="customer"
               value={formData.customer}
-              onChange={handleInputChange}
+              onChange={handleInput}
               disabled={!isEditing}
               required
             />
@@ -172,25 +204,25 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              type="date"
               label="Transaction Date"
               name="transactionDate"
-              type="date"
               value={formData.transactionDate}
-              onChange={handleInputChange}
+              onChange={handleInput}
               disabled={!isEditing}
-              required
               InputLabelProps={{ shrink: true }}
+              required
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              type="date"
               label="Late Pickup Date"
               name="latePickupDate"
-              type="date"
               value={formData.latePickupDate}
-              onChange={handleInputChange}
+              onChange={handleInput}
               disabled={!isEditing}
               InputLabelProps={{ shrink: true }}
             />
@@ -199,32 +231,31 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              type="number"
               label="Amount"
               name="amount"
-              type="number"
               value={formData.amount}
-              onChange={handleInputChange}
+              onChange={handleInput}
               disabled={!isEditing}
               required
-              InputProps={{
-                startAdornment: <span>$</span>
-              }}
             />
           </Grid>
 
+          {/* status --------------------------------------------------------- */}
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
                 value={formData.status}
-                onChange={handleStatusChange}
-                disabled={!isEditing}
                 label="Status"
+                onChange={handleSelect('status')}
+                disabled={!isEditing}
               >
-                <MenuItem value="Pending">Pending</MenuItem>
-                <MenuItem value="Approved">Approved</MenuItem>
-                <MenuItem value="Shipped">Shipped</MenuItem>
-                <MenuItem value="Cancelled">Cancelled</MenuItem>
+                {statusOptions.map((s) => (
+                  <MenuItem key={s} value={s}>
+                    {s}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -232,12 +263,7 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
 
         <Box className={styles.actionButtons}>
           {mode === 'view' && !isEditing ? (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setIsEditing(true)}
-              className={styles.editButton}
-            >
+            <Button variant="contained" onClick={() => setIsEditing(true)}>
               Edit Order
             </Button>
           ) : (
@@ -245,24 +271,12 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
                 disabled={loading}
-                className={styles.submitButton}
+                sx={{ mr: 2 }}
               >
-                {loading ? (
-                  <CircularProgress size={24} />
-                ) : mode === 'create' ? (
-                  'Create Order'
-                ) : (
-                  'Save Changes'
-                )}
+                {loading ? <CircularProgress size={20} /> : 'Save'}
               </Button>
-              <Button
-                variant="outlined"
-                onClick={handleCancel}
-                disabled={loading}
-                className={styles.cancelButton}
-              >
+              <Button variant="outlined" onClick={cancel} disabled={loading}>
                 Cancel
               </Button>
             </>
@@ -271,4 +285,4 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
       </form>
     </Paper>
   );
-} 
+}
