@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { Box, Typography, Paper, Grid, Divider } from '@mui/material';
 import Chart from 'chart.js/auto';
+import { ChartType, ChartData, ChartOptions, ChartDataset, ChartArea, ChartMeta, ArcElement, Chart as ChartJS } from 'chart.js';
 
 const ReportsPage = () => {
   const orders = useSelector((state: RootState) => state.orders.orders);
@@ -64,7 +65,11 @@ const ReportsPage = () => {
     const ctx = chartRef.current.getContext('2d');
     if (!ctx) return;
 
-    chartInstance.current = new Chart(ctx, {
+    const chartConfig: {
+      type: ChartType;
+      data: ChartData;
+      options: ChartOptions<'pie'>;
+    } = {
       type: 'pie',
       data: {
         labels: Object.keys(metrics),
@@ -96,27 +101,31 @@ const ReportsPage = () => {
               },
               generateLabels: function(chart) {
                 const data = chart.data;
-                const datasets = data.datasets[0];
+                if (!data.datasets || !data.datasets.length) return [];
+
+                const dataset = data.datasets[0];
                 const labels = data.labels as string[];
+                const meta = chart.getDatasetMeta(0);
                 
                 return labels.map((label, i) => {
-                  const meta = chart.getDatasetMeta(0);
-                  const value = datasets.data[i] as number;
-                  const total = datasets.data.reduce((acc: number, val: any) => acc + val, 0);
+                  const value = dataset.data?.[i] as number;
+                  const total = (dataset.data as number[]).reduce((acc, val) => acc + (val || 0), 0);
                   const percentage = ((value / total) * 100).toFixed(1);
+                  
+                  const element = meta.data[i] as unknown as { hidden?: boolean };
                   
                   return {
                     text: `${label} (${value} - ${percentage}%)`,
-                    fillStyle: datasets.backgroundColor?.[i],
+                    fillStyle: Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[i] : dataset.backgroundColor,
                     strokeStyle: '#FFFFFF',
                     lineWidth: 1,
-                    hidden: meta.data[i].hidden ?? false,
+                    hidden: element?.hidden ?? false,
                     index: i,
                     fontColor: '#FFFFFF'
                   };
                 });
               },
-              filter: function(item, data) {
+              filter: function(item) {
                 return !item.hidden;
               },
             },
@@ -147,7 +156,8 @@ const ReportsPage = () => {
               label: function(context) {
                 const label = context.label || '';
                 const value = context.raw as number;
-                const total = context.dataset.data.reduce((acc: number, val: any) => acc + val, 0);
+                const dataset = context.dataset;
+                const total = (dataset.data as number[]).reduce((acc, val) => acc + (val || 0), 0);
                 const percentage = ((value / total) * 100).toFixed(1);
                 return `${label}: ${value} (${percentage}%)`;
               }
@@ -155,8 +165,6 @@ const ReportsPage = () => {
           },
         },
         animation: {
-          animateScale: true,
-          animateRotate: true,
           duration: 2000,
           easing: 'easeInOutQuart',
         },
@@ -166,7 +174,9 @@ const ReportsPage = () => {
           }
         },
       },
-    });
+    };
+
+    chartInstance.current = new Chart(ctx, chartConfig);
 
     // Force update the chart to apply the new styles
     chartInstance.current.update();

@@ -1,4 +1,4 @@
-// store/ordersThunks.ts
+// src/store/ordersThunks.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setOrders } from './ordersSlice';
 import type { RawOrder } from '@/types/rawOrder';
@@ -58,75 +58,138 @@ const transformToOrder = (raw: RawOrder): Order => {
   };
 };
 
+/* ------------------------------------------------------------------ */
+/*  ───────────── EXISTING THUNKS (unchanged) ──────────────────────── */
+/* ------------------------------------------------------------------ */
+
 export const fetchOrdersAsync = createAsyncThunk(
   'orders/fetchOrdersAsync',
   async (_, { dispatch }) => {
     const response = await fetch('/api/orders');
-    if (!response.ok) {
-      throw new Error('Failed to fetch orders');
-    }
+    if (!response.ok) throw new Error('Failed to fetch orders');
+
     const data = await response.json();
     const cleanedOrders = (data.orders as RawOrder[]).map(transformToOrder);
+
     dispatch(setOrders(cleanedOrders));
     return cleanedOrders;
   }
 );
 
 export const deleteOrderAsync = createAsyncThunk<string, string>(
-    'orders/deleteOrderAsync',
-    async (orderNumber, { dispatch }) => {
-      console.log('Thunk received orderNumber:', orderNumber, typeof orderNumber);
-      
-      // Delete the order
-      const deleteResponse = await fetch(`/api/orders?orderNumber=${orderNumber}`, {
-        method: 'DELETE',
-      });
-
-      if (!deleteResponse.ok) {
-        const error = await deleteResponse.json();
-        throw new Error(error.message || 'Failed to delete order');
-      }
-
-      // Reload orders to ensure sync
-      const getResponse = await fetch('/api/orders');
-      if (!getResponse.ok) {
-        throw new Error('Failed to reload orders after deletion');
-      }
-      
-      const data = await getResponse.json();
-      const cleanedOrders = (data.orders as RawOrder[]).map(transformToOrder);
-      dispatch(setOrders(cleanedOrders));
-
-      return orderNumber;
+  'orders/deleteOrderAsync',
+  async (orderNumber, { dispatch }) => {
+    const del = await fetch(`/api/orders?orderNumber=${orderNumber}`, { method: 'DELETE' });
+    if (!del.ok) {
+      const err = await del.json();
+      throw new Error(err.message ?? 'Failed to delete order');
     }
-  );
+
+    // refresh list
+    const res = await fetch('/api/orders');
+    if (!res.ok) throw new Error('Failed to reload orders after deletion');
+
+    const data = await res.json();
+    const cleanedOrders = (data.orders as RawOrder[]).map(transformToOrder);
+    dispatch(setOrders(cleanedOrders));
+
+    return orderNumber;
+  }
+);
 
 export const updateOrderStatusAsync = createAsyncThunk(
   'orders/updateOrderStatusAsync',
   async ({ orderNumber, status }: { orderNumber: string; status: Order['status'] }, { dispatch }) => {
-    const response = await fetch(`/api/orders?orderNumber=${orderNumber}`, {
+    const put = await fetch(`/api/orders?orderNumber=${orderNumber}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
+    if (!put.ok) throw new Error('Failed to update order status');
 
-    if (!response.ok) {
-      throw new Error('Failed to update order status');
-    }
+    // refresh list
+    const res = await fetch('/api/orders');
+    if (!res.ok) throw new Error('Failed to reload orders after status update');
 
-    // Reload orders to ensure sync
-    const getResponse = await fetch('/api/orders');
-    if (!getResponse.ok) {
-      throw new Error('Failed to reload orders after status update');
-    }
-    
-    const data = await getResponse.json();
+    const data = await res.json();
     const cleanedOrders = (data.orders as RawOrder[]).map(transformToOrder);
     dispatch(setOrders(cleanedOrders));
 
     return { orderNumber, status };
   }
 );
- 
+
+/* ------------------------------------------------------------------ */
+/*  ───────────── NEW THUNKS REQUIRED BY OrderForm.tsx ─────────────── */
+/* ------------------------------------------------------------------ */
+
+/**
+ * createOrderAsync
+ * POSTs a new order, then refreshes the list so all pages stay in sync.
+ */
+export const createOrderAsync = createAsyncThunk<
+  Order,          // return type
+  Order,          // argument type
+  { rejectValue: string }
+>('orders/createOrderAsync', async (order, { dispatch, rejectWithValue }) => {
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order),
+    });
+    if (!res.ok) throw new Error('Network response was not ok');
+    const saved = transformToOrder(await res.json());
+
+    // refresh list
+    await dispatch(fetchOrdersAsync());
+
+    return saved;
+  } catch (err: any) {
+    return rejectWithValue(err.message ?? 'Failed to create order');
+  }
+});
+
+/**
+ * fetchOrderByIdAsync
+ * Retrieves a single order for the View / Edit page.
+ */
+export const fetchOrderByIdAsync = createAsyncThunk<Order, string>(
+  'orders/fetchOrderByIdAsync',
+  async (orderNumber) => {
+    const res = await fetch(`/api/orders?orderNumber=${orderNumber}`);
+    if (!res.ok) throw new Error('Failed to fetch order');
+
+    const raw: RawOrder = await res.json();
+    return transformToOrder(raw);
+  }
+);
+
+/**
+ * updateOrderAsync
+ * PUTs the full order payload, then refreshes the list.
+ */
+export const updateOrderAsync = createAsyncThunk<
+  Order,
+  Order,
+  { rejectValue: string }
+>('orders/updateOrderAsync', async (order, { dispatch, rejectWithValue }) => {
+  try {
+    const res = await fetch(`/api/orders?orderNumber=${order.orderNumber}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order),
+    });
+    if (!res.ok) throw new Error('Network response was not ok');
+
+    const updated = transformToOrder(await res.json());
+
+    // refresh list
+    await dispatch(fetchOrdersAsync());
+
+    return updated;
+  } catch (err: any) {
+    return rejectWithValue(err.message ?? 'Failed to update order');
+  }
+});
+

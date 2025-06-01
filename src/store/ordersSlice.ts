@@ -1,7 +1,7 @@
 // store/ordersSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Order } from '@/types/order';
-import { deleteOrderAsync } from './ordersThunks';
+import { deleteOrderAsync, createOrderAsync } from './ordersThunks';
 
 export interface OrdersState {
   orders: Order[];
@@ -191,6 +191,20 @@ export const ordersSlice = createSlice({
         console.log('Orders after deletion:', state.orders.map(o => o.orderNumber));
       })
       .addCase(deleteOrderAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(createOrderAsync.pending, (state) => {
+        state.loading = true;
+        state.error = undefined;
+      })
+      .addCase(createOrderAsync.fulfilled, (state, action: PayloadAction<Order>) => {
+        state.orders.push(action.payload);
+        state.orderCount = state.orders.length;
+        state.loading = false;
+        saveToLocalStorage(state.orders);
+      })
+      .addCase(createOrderAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });

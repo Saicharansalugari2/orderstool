@@ -23,7 +23,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import type { Order } from '../types/order';
+import type { Order, OrderStatus, OrderLine } from '../types/order';
 import styles from '@/styles/components/OrderForm.module.css';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -35,7 +35,12 @@ interface OrderFormProps {
   orderNumber?: string;
 }
 
-const statusOptions = [
+interface StatusOption {
+  value: OrderStatus;
+  color: string;
+}
+
+const statusOptions: StatusOption[] = [
   { value: 'Pending', color: '#FF9800' },
   { value: 'Approved', color: '#4CAF50' },
   { value: 'Shipped', color: '#2196F3' },
@@ -55,7 +60,7 @@ const pendingApprovalReasonCodes = [
 const itemOptions = ['Gloves', 'Masks', 'Cups and Lids', 'Cutlery', 'Pans'];
 const unitsOptions = ['Box', 'Pack', 'Piece', 'Set'];
 
-const initialOrderState: Omit<Order, 'orderNumber'> = {
+const initialOrderState: Omit<Order, 'orderNumber' | 'id'> = {
   customer: '',
   transactionDate: new Date().toISOString().split('T')[0],
   latePickupDate: '',
@@ -63,23 +68,24 @@ const initialOrderState: Omit<Order, 'orderNumber'> = {
   status: 'Pending',
   fromLocation: '',
   toLocation: '',
-  pendingApprovalReasonCodes: [],
+  pendingApprovalReasonCode: [],
   supportRep: '',
   incoterm: '',
   freightTerms: '',
-  totalShipUnitCount: '',
-  totalQuantity: '',
-  discountRate: '',
+  totalShipUnitCount: 0,
+  totalQuantity: 0,
+  discountRate: 0,
   billingAddress: '',
   shippingAddress: '',
   earlyPickupDate: '',
-  lines: [{ id: 1, item: '', units: '', quantity: 0, price: 0, amount: 0 }]
+  lines: [{ id: 'line-1', item: '', units: '', quantity: 0, price: 0, amount: 0 }],
+  history: [{ timestamp: new Date().toISOString(), event: 'Order Created' }]
 };
 
 export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [formData, setFormData] = useState(initialOrderState);
+  const [formData, setFormData] = useState<Omit<Order, 'orderNumber' | 'id'>>(initialOrderState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -94,7 +100,7 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
             throw new Error('Failed to fetch orders');
           }
           const orders = await response.json();
-          const orderData = orders.find((order: any) => order.orderNumber === orderNumber);
+          const orderData = orders.find((order: Order) => order.orderNumber === orderNumber);
           
           if (!orderData) {
             throw new Error('Order not found');
@@ -114,9 +120,9 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
           };
 
           // Create a new object with the data
-          const parsedData = {
+          const parsedData: Omit<Order, 'orderNumber' | 'id'> = {
             ...orderData,
-            transactionDate: formatDate(orderData.orderCreatedDate), // Map orderCreatedDate to transactionDate
+            transactionDate: formatDate(orderData.transactionDate),
             earlyPickupDate: formatDate(orderData.earlyPickupDate),
             latePickupDate: formatDate(orderData.latePickupDate)
           };
@@ -143,6 +149,23 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (mode === 'create') {
       const { name, value } = e.target;
+      
+      // Handle numeric fields
+      if (name === 'totalShipUnitCount' || name === 'totalQuantity' || name === 'discountRate') {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          if (name === 'discountRate') {
+            setFormData(prev => ({ 
+              ...prev, 
+              [name]: Math.min(Math.max(numValue, 0), 100) 
+            }));
+          } else {
+            setFormData(prev => ({ ...prev, [name]: numValue }));
+          }
+        }
+        return;
+      }
+
       setFormData(prev => ({
         ...prev,
         [name]: value
@@ -150,22 +173,25 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
     }
   };
 
-  const handleStatusChange = (e: SelectChangeEvent) => {
+  const handleStatusChange = (e: SelectChangeEvent<OrderStatus>) => {
     if (mode === 'create') {
       setFormData(prev => ({
         ...prev,
-        status: e.target.value as Order['status']
+        status: e.target.value as OrderStatus
       }));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (mode === 'create') {
       setLoading(true);
       setError(null);
       try {
-        const result = await dispatch(createOrderAsync(formData)).unwrap();
+        const result = await dispatch(createOrderAsync({
+          ...formData,
+          orderNumber: crypto.randomUUID(),
+        })).unwrap();
         setShowSuccess(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to create order');
@@ -180,8 +206,8 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
   };
 
   const handleOrderLineChange = (
-    id: number,
-    field: string,
+    id: string,
+    field: keyof OrderLine,
     value: string | number
   ) => {
     if (mode === 'create') {
@@ -205,17 +231,22 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
 
   const addOrderLine = () => {
     if (mode === 'create') {
+      const newLine: OrderLine = {
+        id: `line-${formData.lines.length + 1}`,
+        item: '',
+        units: '',
+        quantity: 0,
+        price: 0,
+        amount: 0
+      };
       setFormData(prev => ({
         ...prev,
-        lines: [
-          ...prev.lines,
-          { id: prev.lines.length + 1, item: '', units: '', quantity: 0, price: 0, amount: 0 }
-        ]
+        lines: [...prev.lines, newLine]
       }));
     }
   };
 
-  const removeOrderLine = (id: number) => {
+  const removeOrderLine = (id: string) => {
     if (mode === 'create' && formData.lines.length > 1) {
       setFormData(prev => ({
         ...prev,
@@ -245,7 +276,7 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
       '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.23)' },
       '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.4)' }
     }
-  };
+  } as const;
 
   const commonSelectProps = {
     sx: { 
@@ -264,24 +295,14 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
       '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.23)' },
       '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.4)' }
     }
+  } as const;
+
+  const getStatusColor = (status: OrderStatus): string => {
+    const option = statusOptions.find(opt => opt.value === status);
+    return option?.color || '#52a8ec';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Cancelled':
-        return '#F44336'; // Red
-      case 'Pending':
-        return '#FF9800'; // Orange
-      case 'Approved':
-        return '#4CAF50'; // Green
-      case 'Shipped':
-        return '#2196F3'; // Blue
-      default:
-        return '#52a8ec';
-    }
-  };
-
-  const getStatusStyles = (status: string) => {
+  const getStatusStyles = (status: OrderStatus) => {
     const color = getStatusColor(status);
     return {
       color: color,
@@ -296,6 +317,28 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
         backgroundColor: `${color}20`
       }
     };
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string | string[]>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'incoterm' && value) {
+      setFormData(prev => ({ ...prev, incoterm: value as string, freightTerms: '' }));
+      return;
+    }
+    if (name === 'freightTerms' && value) {
+      setFormData(prev => ({ ...prev, freightTerms: value as string, incoterm: '' }));
+      return;
+    }
+    if (name === 'pendingApprovalReasonCode') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [name]: typeof value === 'string' ? [value] : value 
+      }));
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   if (loading && mode === 'view') {
@@ -362,20 +405,13 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
               label="Transaction Date"
               name="transactionDate"
               type="date"
-              value={formData.transactionDate || ''}
+              value={formData.transactionDate}
               onChange={handleInputChange}
               disabled={mode === 'view'}
               required
-              placeholder="Select date"
               InputLabelProps={{ 
                 shrink: true,
                 sx: { color: 'rgba(255, 255, 255, 0.7)' }
-              }}
-              sx={{
-                ...commonInputProps.sx,
-                '& input[type="date"]::-webkit-calendar-picker-indicator': {
-                  filter: 'invert(1)'
-                }
               }}
             />
           </Grid>
@@ -387,15 +423,10 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
                 {...commonSelectProps}
                 name="fromLocation"
                 value={formData.fromLocation}
-                onChange={handleStatusChange}
+                onChange={handleSelectChange}
                 disabled={mode === 'view'}
                 label="From Location"
-                displayEmpty
-                renderValue={(value) => value || "Select location"}
               >
-                <MenuItem disabled value="">
-                  <em style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Select location</em>
-                </MenuItem>
                 {locationOptions.map(option => (
                   <MenuItem key={option} value={option}>{option}</MenuItem>
                 ))}
@@ -423,17 +454,23 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
 
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Incoterm</InputLabel>
-              <Select
+              <InputLabel>Status</InputLabel>
+              <Select<OrderStatus>
                 {...commonSelectProps}
-                name="incoterm"
-                value={formData.incoterm}
+                name="status"
+                value={formData.status}
                 onChange={handleStatusChange}
-                disabled={mode === 'view' || !!formData.freightTerms}
-                label="Incoterm"
+                disabled={mode === 'view'}
+                label="Status"
               >
-                {incotermOptions.map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                {statusOptions.map(option => (
+                  <MenuItem 
+                    key={option.value} 
+                    value={option.value}
+                    sx={getStatusStyles(option.value)}
+                  >
+                    {option.value}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -441,64 +478,103 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
 
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Freight Terms</InputLabel>
+              <InputLabel>Pending Approval Reason</InputLabel>
               <Select
                 {...commonSelectProps}
-                name="freightTerms"
-                value={formData.freightTerms}
-                onChange={handleStatusChange}
-                disabled={mode === 'view' || !!formData.incoterm}
-                label="Freight Terms"
+                name="pendingApprovalReasonCode"
+                value={formData.pendingApprovalReasonCode}
+                onChange={handleSelectChange}
+                disabled={mode === 'view'}
+                label="Pending Approval Reason"
+                multiple
               >
-                {freightTermsOptions.map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                {pendingApprovalReasonCodes.map(code => (
+                  <MenuItem key={code} value={code}>
+                    {code}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              {...commonInputProps}
-              fullWidth
-              label="Support Representative"
-              name="supportRep"
-              value={formData.supportRep}
-              onChange={handleInputChange}
-              disabled={mode === 'view'}
-              placeholder="Enter representative name"
-              InputLabelProps={{ 
-                shrink: true,
-                sx: { color: 'rgba(255, 255, 255, 0.7)' }
+          {/* Order Lines */}
+          {formData.lines.map((line) => (
+            <Box 
+              key={line.id}
+              sx={{
+                display: 'flex',
+                gap: 2,
+                mb: 2,
+                p: 2,
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
+                alignItems: 'center'
               }}
-            />
-          </Grid>
+            >
+              <FormControl sx={{ flex: 2 }}>
+                <InputLabel>Item</InputLabel>
+                <Select
+                  {...commonSelectProps}
+                  value={line.item}
+                  onChange={(e) => handleOrderLineChange(line.id, 'item', e.target.value)}
+                  disabled={mode === 'view'}
+                  label="Item"
+                >
+                  {itemOptions.map(option => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
+              <FormControl sx={{ flex: 1 }}>
+                <InputLabel>Units</InputLabel>
+                <Select
+                  {...commonSelectProps}
+                  value={line.units}
+                  onChange={(e) => handleOrderLineChange(line.id, 'units', e.target.value)}
+                  disabled={mode === 'view'}
+                  label="Units"
+                >
+                  {unitsOptions.map(option => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <TextField
                 {...commonInputProps}
-                fullWidth
-                label="Status"
-                value={formData.status}
-                disabled
-                InputLabelProps={{ 
-                  shrink: true,
-                  sx: { color: 'rgba(255, 255, 255, 0.7)' }
-                }}
-                InputProps={{
-                  sx: {
-                    color: getStatusColor(formData.status),
-                    backgroundColor: `${getStatusColor(formData.status)}15`,
-                    '& .MuiInputBase-input': {
-                      color: getStatusColor(formData.status),
-                      '-webkit-text-fill-color': getStatusColor(formData.status)
-                    }
-                  }
-                }}
+                label="Quantity"
+                type="number"
+                value={line.quantity}
+                onChange={(e) => handleOrderLineChange(line.id, 'quantity', Number(e.target.value))}
+                disabled={mode === 'view'}
+                sx={{ flex: 1, ...commonInputProps.sx }}
               />
-            </FormControl>
-          </Grid>
+
+              <TextField
+                {...commonInputProps}
+                label="Price"
+                type="number"
+                value={line.price}
+                onChange={(e) => handleOrderLineChange(line.id, 'price', Number(e.target.value))}
+                disabled={mode === 'view'}
+                sx={{ flex: 1, ...commonInputProps.sx }}
+              />
+
+              <Typography sx={{ flex: 1, color: '#52a8ec' }}>
+                ${line.amount.toFixed(2)}
+              </Typography>
+
+              {mode === 'create' && formData.lines.length > 1 && (
+                <IconButton 
+                  onClick={() => removeOrderLine(line.id)}
+                  sx={{ color: '#f44336' }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              )}
+            </Box>
+          ))}
 
           {/* Dates Section */}
           <Grid item xs={12}>
@@ -568,112 +644,6 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
             />
           </Grid>
 
-          {/* Order Lines Section */}
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ color: '#52a8ec', mb: 2, mt: 2 }}>Order Lines</Typography>
-          </Grid>
-
-          <Grid item xs={12}>
-            {formData.lines.map((line, index) => (
-              <Box 
-                key={line.id}
-                sx={{
-                  display: 'flex',
-                  gap: 2,
-                  mb: 2,
-                  p: 2,
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  alignItems: 'center'
-                }}
-              >
-                <FormControl sx={{ flex: 2 }}>
-                  <InputLabel>Item</InputLabel>
-                  <Select
-                    {...commonSelectProps}
-                    value={line.item}
-                    onChange={(e) => handleOrderLineChange(line.id, 'item', e.target.value)}
-                    disabled={mode === 'view'}
-                    label="Item"
-                  >
-                    {itemOptions.map(option => (
-                      <MenuItem key={option} value={option}>{option}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl sx={{ flex: 1 }}>
-                  <InputLabel>Units</InputLabel>
-                  <Select
-                    {...commonSelectProps}
-                    value={line.units}
-                    onChange={(e) => handleOrderLineChange(line.id, 'units', e.target.value)}
-                    disabled={mode === 'view'}
-                    label="Units"
-                  >
-                    {unitsOptions.map(option => (
-                      <MenuItem key={option} value={option}>{option}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <TextField
-                  {...commonInputProps}
-                  label="Quantity"
-                  type="number"
-                  value={line.quantity}
-                  onChange={(e) => handleOrderLineChange(line.id, 'quantity', e.target.value)}
-                  disabled={mode === 'view'}
-                  placeholder="Enter quantity"
-                  sx={{ flex: 1, ...commonInputProps.sx }}
-                />
-
-                <TextField
-                  {...commonInputProps}
-                  label="Price"
-                  type="number"
-                  value={line.price}
-                  onChange={(e) => handleOrderLineChange(line.id, 'price', e.target.value)}
-                  disabled={mode === 'view'}
-                  placeholder="Enter price"
-                  sx={{ flex: 1, ...commonInputProps.sx }}
-                />
-
-                <Typography sx={{ flex: 1, color: '#52a8ec' }}>
-                  ${line.amount}
-                </Typography>
-
-                {mode === 'create' && formData.lines.length > 1 && (
-                  <IconButton 
-                    onClick={() => removeOrderLine(line.id)}
-                    sx={{ color: '#f44336' }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                )}
-              </Box>
-            ))}
-
-            {mode === 'create' && (
-              <Button
-                startIcon={<AddCircleIcon />}
-                onClick={addOrderLine}
-                sx={{
-                  mt: 2,
-                  color: '#52a8ec',
-                  borderColor: '#52a8ec',
-                  '&:hover': {
-                    borderColor: '#3994d6',
-                    backgroundColor: 'rgba(82, 168, 236, 0.1)',
-                  },
-                }}
-                variant="outlined"
-              >
-                Add Order Line
-              </Button>
-            )}
-          </Grid>
-
           {/* Total Amount */}
           <Grid item xs={12}>
             <Box sx={{ 
@@ -692,6 +662,38 @@ export default function OrderForm({ mode, orderNumber }: OrderFormProps) {
               </Typography>
             </Box>
           </Grid>
+
+          <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
+            <TextField
+              label="Total Ship Unit Count"
+              name="totalShipUnitCount"
+              type="number"
+              inputProps={{ min: 0, step: 1 }}
+              value={formData.totalShipUnitCount}
+              onChange={handleInputChange}
+              sx={{ ...commonInputProps.sx, flex: 1 }}
+            />
+            <TextField
+              label="Total Quantity"
+              name="totalQuantity"
+              type="number"
+              inputProps={{ min: 0, step: 1 }}
+              value={formData.totalQuantity}
+              onChange={handleInputChange}
+              sx={{ ...commonInputProps.sx, flex: 1 }}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
+            <TextField
+              label="Discount Rate (%)"
+              name="discountRate"
+              type="number"
+              inputProps={{ min: 0, max: 100, step: 0.01 }}
+              value={formData.discountRate}
+              onChange={handleInputChange}
+              sx={{ ...commonInputProps.sx, flex: 1 }}
+            />
+          </Box>
         </Grid>
 
         <Box className={styles.actionButtons}>
