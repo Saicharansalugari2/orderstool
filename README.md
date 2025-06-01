@@ -113,10 +113,12 @@ git clone https://github.com/Saicharansalugari2/orderstool.git
 # Enter the project folder
 cd orderstool
 
-3. Install Dependencies
+# Install Dependencies
+
 Important: If you encounter any peer‐dependency or version conflicts (especially with MUI), see the “Troubleshooting” section below.
 
 3.1. Using npm
+
 bash
 
 npm install
