@@ -682,7 +682,7 @@
     "customer": "Globex LLC",
     "orderCreatedDate": "2025-05-02T04:00:00.000Z",
     "dueDate": "2025-06-02T04:00:00.000Z",
-    "status": "Approved",
+    "status": "Shipped",
     "fromLocation": "Warehouse B",
     "toLocation": "Distributor C",
     "pendingApprovalReasonCodes": [

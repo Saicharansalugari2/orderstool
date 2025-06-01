@@ -1,12 +1,14 @@
-import React, { useMemo } from "react";
-import { Bar } from "react-chartjs-2";
-import { useAppSelector } from "@/store/hooks";
-import { Box, useTheme } from "@mui/material";
+/* src/components/dashboard/OrdersByCustomerChart.tsx */
+
+import React, { useMemo } from 'react';
+import { Bar } from 'react-chartjs-2';
+import { useAppSelector } from '@/store/hooks';
+import { Box, useTheme } from '@mui/material';
 import type {
   ChartData,
   ChartOptions,
   ScriptableContext,
-} from "chart.js";
+} from 'chart.js';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,154 +17,97 @@ import {
   Title,
   Tooltip,
   Legend,
-} from "chart.js";
+} from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const OrdersByCustomerChart: React.FC = () => {
   const theme = useTheme();
-  const orders = useAppSelector((state) => state.orders.orders);
+  const orders = useAppSelector((s) => s.orders.orders);
 
   const { amountsByCustomer, maxAmount } = useMemo(() => {
-    const amounts = orders.reduce((acc, order) => {
-      if (order.customer) {
-        acc[order.customer] = (acc[order.customer] ?? 0) + (order.amount ?? 0);
+    const totals = orders.reduce<Record<string, number>>((acc, o) => {
+      if (o.customer) {
+        acc[o.customer] = (acc[o.customer] ?? 0) + (o.amount ?? 0);
       }
       return acc;
-    }, {} as Record<string, number>);
-    
-    const values = Object.values(amounts) as number[]; 
-    const max    = values.length ? Math.max(...values) : 0; 
-    return { amountsByCustomer: amounts, maxAmount: max };
+    }, {});
+    const vals = Object.values(totals) as number[];
+    return { amountsByCustomer: totals, maxAmount: vals.length ? Math.max(...vals) : 0 };
   }, [orders]);
 
   const labels = Object.keys(amountsByCustomer);
-  
-  // Generated gradient for bars
+
   const getGradient = (ctx: CanvasRenderingContext2D) => {
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(82, 168, 236, 0.8)');
-    gradient.addColorStop(1, 'rgba(82, 168, 236, 0.2)');
-    return gradient;
+    const g = ctx.createLinearGradient(0, 0, 0, 400);
+    g.addColorStop(0, 'rgba(82,168,236,0.8)');
+    g.addColorStop(1, 'rgba(82,168,236,0.2)');
+    return g;
   };
 
-  const chartData: ChartData<'bar'> = {
+  const data: ChartData<'bar'> = {
     labels,
     datasets: [
       {
-        label: "Order Amount ($)",
-        data: labels.map((label) => amountsByCustomer[label]),
-        backgroundColor: function(context: ScriptableContext<"bar">) {
-          const chart = context.chart;
-          const { ctx, chartArea } = chart;
-          if (!chartArea) return 'rgba(82, 168, 236, 0.6)';
-          return getGradient(ctx);
+        label: 'Order Amount ($)',
+        data: labels.map((l) => amountsByCustomer[l]),
+        backgroundColor(context: ScriptableContext<'bar'>) {
+          const { chartArea, ctx: canvasCtx } = context.chart;
+          return chartArea ? getGradient(canvasCtx) : 'rgba(82,168,236,0.6)';
         },
-        borderColor: "rgba(82, 168, 236, 1)",
+        borderColor: 'rgba(82,168,236,1)',
         borderWidth: 1,
         borderRadius: 6,
-        hoverBackgroundColor: "rgba(82, 168, 236, 0.8)",
-        hoverBorderColor: "rgba(82, 168, 236, 1)",
+        hoverBackgroundColor: 'rgba(82,168,236,0.8)',
+        hoverBorderColor: 'rgba(82,168,236,1)',
         hoverBorderWidth: 2,
       },
     ],
   };
 
-  const chartOptions: ChartOptions<'bar'> = {
+  const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: {
-      duration: 2000,
-      easing: "easeInOutQuart",
-    },
+    interaction: { mode: 'index', intersect: false },
+    layout: { padding: { left: 20, right: 20, bottom: 25 } },
+    animation: { duration: 1200, easing: 'easeInOutQuart' },
     plugins: {
       legend: {
-        position: "top",
-        labels: {
-          color: "#fff",
-          font: {
-            size: 12,
-            weight: "bold",
-          },
-          padding: 20,
-        },
+        position: 'top',
+        labels: { color: '#fff', font: { size: 12, weight: 'bold' } },
       },
       title: {
         display: true,
-        text: "Total Order Amount by Customer",
-        font: { 
-          size: 20,
-          weight: "bold",
-          family: theme.typography.fontFamily,
-        },
-        color: "#fff",
+        text: 'Total Order Amount by Customer',
+        color: '#fff',
+        font: { size: 20, weight: 'bold', family: theme.typography.fontFamily },
         padding: { bottom: 30 },
       },
       tooltip: {
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        titleColor: "#52a8ec",
-        bodyColor: "#fff",
-        bodyFont: {
-          size: 14,
-        },
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: false,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        titleColor: '#52a8ec',
+        bodyColor: '#fff',
         callbacks: {
-          label: function(context: any) {
-            return `$ ${context.parsed.y.toLocaleString()}`;
-          }
-        }
+          label: (ctx) => `$ ${ctx.parsed.y.toLocaleString()}`,
+        },
       },
     },
     scales: {
       x: {
-        ticks: { 
-          color: "#ffffff",
-          font: {
-            size: 9,
-          },
-          maxRotation: 0,
-          minRotation: 0,
-        },
-        grid: { 
-          color: "rgba(255, 255, 255, 0.1)",
-          display: false,
-        },
-        border: {
-          display: false,
-        },
+        ticks: { color: '#fff', font: { size: 9 } },
+        grid: { display: false },
+        border: { display: false },
       },
       y: {
         beginAtZero: true,
-        suggestedMax: maxAmount * 1.1, 
-        ticks: { 
-          color: "rgba(255, 255, 255, 0.7)",
-          font: {
-            size: 11,
-          },
-          callback: function(value: number) {
-            return '$ ' + value.toLocaleString();
-          },
+        suggestedMax: maxAmount ? maxAmount * 1.1 : 10,
+        ticks: {
+          color: 'rgba(255,255,255,0.7)',
+          font: { size: 11 },
+          callback: (v) => '$ ' + Number(v).toLocaleString(),
         },
-        grid: { 
-          color: "rgba(255, 255, 255, 0.1)",
-          display: false,
-        },
-        border: {
-          display: false,
-        },
-      },
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index',
-    },
-    layout: {
-      padding: {
-        left: 20,
-        right: 20,
-        bottom: 25, 
+        grid: { display: false },
+        border: { display: false },
       },
     },
   };
@@ -172,31 +117,25 @@ const OrdersByCustomerChart: React.FC = () => {
       sx={{
         height: 450,
         width: '100%',
-        maxWidth: '100%',
-        ml: 0,
-        mr: 0,
-        my: 4,
         p: 3,
-        bgcolor: "rgba(0, 0, 0, 0.7)",
+        bgcolor: 'rgba(0,0,0,0.7)',
         borderRadius: 3,
-        backdropFilter: "blur(10px)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-        position: "relative",
-        overflow: "hidden",
-        "&::before": {
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+        position: 'relative',
+        overflow: 'hidden',
+        '::before': {
           content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "linear-gradient(135deg, rgba(82, 168, 236, 0.1) 0%, rgba(82, 168, 236, 0) 100%)",
-          pointerEvents: "none",
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(135deg, rgba(82,168,236,0.12) 0%, rgba(82,168,236,0) 100%)',
+          pointerEvents: 'none',
         },
       }}
     >
-      <Bar data={chartData} options={chartOptions} />
+      <Bar data={data} options={options} />
     </Box>
   );
 };
